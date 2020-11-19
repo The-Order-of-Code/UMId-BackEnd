@@ -1,8 +1,8 @@
 import mysql.connector
 
-###################
-#PREENCHER ISTO!!!#
-###################
+#######################################
+#PREENCHER ISTO COM OS VOSSOS DADOS!!!#
+#######################################
 cnx = mysql.connector.connect(host="", user="", password="", database="bd_umid")
 
 
@@ -55,9 +55,27 @@ def insertUser(nome, numero_de_estudante, username, password, email, data_de_nas
 
 def deleteUser(numero_de_estudante):
 
-	query = "DELETE FROM `Utilizador` WHERE numero_de_estudante = %s"
+	query = """ SELECT idutilizador FROM Utilizador WHERE numero_de_estudante = %s """
 	cursor = cnx.cursor(prepared=True)
 	cursor.execute(query, (numero_de_estudante, ))
+	result1 = cursor.fetchone()
+	cursor.close()
+
+	query = "DELETE FROM `ListaReservas` WHERE idutilizador = %s"
+	cursor = cnx.cursor(prepared=True)
+	cursor.execute(query, (result1[0], ))
+	cnx.commit()
+	cursor.close()
+
+	query = "DELETE FROM `ListaCompras` WHERE idutilizador = %s"
+	cursor = cnx.cursor(prepared=True)
+	cursor.execute(query, (result1[0], ))
+	cnx.commit()
+	cursor.close()
+
+	query = "DELETE FROM `Utilizador` WHERE idutilizador = %s"
+	cursor = cnx.cursor(prepared=True)
+	cursor.execute(query, (result1[0], ))
 	cnx.commit()
 	cursor.close()
 
