@@ -31,6 +31,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'general',
+    'library',
     'rest_framework',
     'rest_framework.authtoken',
     'django.contrib.admin',

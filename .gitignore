@@ -288,3 +288,7 @@ bh_unicode_properties.cache
 GitHub.sublime-settings
 
 # End of https://www.toptal.com/developers/gitignore/api/django,pycharm,sublimetext
+EasyID/general/migrations/0001_initial.py
+EasyID/general/migrations/0002_remove_user_ofage.py
+EasyID/library/migrations/0001_initial.py
+EasyID/library/migrations/0002_auto_20201129_1603.py
