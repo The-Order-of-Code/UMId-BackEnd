@@ -2156,3 +2156,13 @@ INSERT INTO `ListaCompras` VALUES ('1','1','2'),
 ('998','3','9'),
 ('999','4','5'),
 ('1000','5','4');
+
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE Utilizador
+SET	maior_de_idade = CASE
+	WHEN TIMESTAMPDIFF(YEAR, data_de_nascimento, CURDATE()) >= 18 THEN 1
+	ELSE 0
+END;
+
+SET SQL_SAFE_UPDATES = 1;
