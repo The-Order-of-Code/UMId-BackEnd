@@ -11,13 +11,13 @@ class Ticket(models.Model):
 
 
 class TicketWallet(models.Model):
-    student = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, null=True)
+    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
     amount = models.IntegerField()
 
     def __str__(self):
         return f'{self.student} has {self.amount} of {self.ticket.type}'
 
     class Meta:
-        ordering = ['student', 'ticket']
+        ordering = ['student', 'ticket']  # For the admin page
         unique_together = ['student', 'ticket']
