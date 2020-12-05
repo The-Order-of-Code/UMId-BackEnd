@@ -25,11 +25,10 @@ class User(AbstractUser):
 
 class Student(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+	course = models.ForeignKey(Course, null=True, on_delete=models.SET_NULL)
 	number = models.IntegerField()
 	birthdate = models.DateField()
-	# ofAge = models.BooleanField(default=False) #Será necessário ter isto se temos a data de nascimento?
 	year = models.IntegerField()
-	course = models.ForeignKey(Course, null=True, on_delete=models.SET_NULL)
 	
 	def __str__(self):
 		return self.name
