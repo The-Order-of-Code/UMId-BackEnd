@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.db import transaction
 from .models import User, Course, Student, Employee
 
 class UserSerializer(serializers.ModelSerializer):
@@ -26,6 +27,7 @@ class StudentSerializer(serializers.ModelSerializer):
 	user = UserSerializer()
 	course = CourseSerializer()
 
+	@transaction.atomic
 	def create(self, validated_data):
 		#Create user in DB
 		userData = validated_data.pop('user')
@@ -49,6 +51,7 @@ class StudentSerializer(serializers.ModelSerializer):
 class EmployeeSerializer(serializers.ModelSerializer):
 	user = UserSerializer()
 
+	@transaction.atomic
 	def create(self, validated_data):
 		#Create user in DB
 		userData = validated_data.pop('user')
