@@ -55,7 +55,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
 		user = User.objects.create(**userData)
 
 		#Create employee given the user and the rest of vars
-		employee = Employee.objects.create(user=user, course=course, **validated_data)
+		employee = Employee.objects.create(user=user, **validated_data)
 		return employee
 
 	class Meta:
