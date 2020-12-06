@@ -5,7 +5,17 @@ class UserSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = User
 		#fields = "__all__"
-		fields = ["username", "password"]
+		fields = [
+			"username",
+			"password",
+			"first_name",
+			"last_name",
+			"fullName",
+			"birthDate",
+			"birthParish",
+			"birthMunicipality",
+			"birthDistrict",
+			"birthCountry"]
 
 class CourseSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -34,4 +44,4 @@ class StudentSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Student
-		fields = ["user", "course", "number", "birthdate", "year"]
+		fields = "__all__"
