@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Course, Student
+from .models import User, Course, Student, Employee
 
 class UserSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -44,4 +44,20 @@ class StudentSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Student
+		fields = "__all__"
+
+class EmployeeSerializer(serializers.ModelSerializer):
+	user = UserSerializer()
+
+	def create(self, validated_data):
+		#Create user in DB
+		userData = validated_data.pop('user')
+		user = User.objects.create(**userData)
+
+		#Create employee given the user and the rest of vars
+		employee = Employee.objects.create(user=user, course=course, **validated_data)
+		return employee
+
+	class Meta:
+		model = Employee
 		fields = "__all__"

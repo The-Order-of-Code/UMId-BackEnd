@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from .models import User, Course, Student
-from .serializers import UserSerializer, CourseSerializer, StudentSerializer
+from .models import User, Course, Student, Employee
+from .serializers import UserSerializer, CourseSerializer, StudentSerializer, EmployeeSerializer
 from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
 
@@ -45,3 +45,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 class StudentViewSet(viewsets.ModelViewSet):
 	queryset = Student.objects.all()
 	serializer_class = StudentSerializer
+
+class EmployeeViewSet(viewsets.ModelViewSet):
+	queryset = Employee.objects.all()
+	serializer_class = EmployeeSerializer
