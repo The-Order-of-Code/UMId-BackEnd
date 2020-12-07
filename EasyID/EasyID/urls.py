@@ -16,7 +16,23 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+############ Only to have all paths in main page, idk how else to do it ########################################
+from library.views import RoomViewSet, ReservationViewSet
+from general.views import UserViewSet, CourseViewSet, StudentViewSet, EmployeeViewSet
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register("users", UserViewSet, basename="users")
+router.register("courses", CourseViewSet, basename="courses")
+router.register("students", StudentViewSet, basename="students")
+router.register("employees", EmployeeViewSet, basename="employees")
+router.register("rooms", RoomViewSet, basename="rooms")
+router.register("reservations", ReservationViewSet, basename="reservations")
+############ Only to have all paths in main page, idk how else to do it ########################################
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("", include("general.urls")),
+    path("", include(router.urls)),
+    path("general/", include("general.urls")),
+    path("library/", include("library.urls")),
 ]
