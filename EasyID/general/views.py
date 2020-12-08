@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .models import User, Course, Student, Employee
 from .serializers import UserSerializer, CourseSerializer, StudentSerializer, EmployeeSerializer
-from .serializers import UserInfoSerializer, CourseInfoSerializer, StudentInfoSerializer, EmployeeInfoSerializer
+from .serializers import UserInfoSerializer, StudentInfoSerializer, EmployeeInfoSerializer
 from rest_framework import viewsets
 
 # Create your views here.
@@ -45,12 +45,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class CourseViewSet(viewsets.ModelViewSet):
 	queryset = Course.objects.all()
-
-	def get_serializer_class(self):
-		if self.action == "list" or self.action == 'retrieve':
-			return CourseInfoSerializer
-		else:
-			return CourseSerializer
+	serializer_class = CourseSerializer
 
 class StudentViewSet(viewsets.ModelViewSet):
 	queryset = Student.objects.all()

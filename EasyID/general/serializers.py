@@ -4,7 +4,6 @@ from .models import User, Course, Student, Employee
 
 #Normal serializer for create, update, etc...
 #Info serializer for gets
-#Id serializer for inputs that just need a way to identify the object, like when a user makes a reservation
 #Maybe find a better way to do this later
 
 # User #############################################################################
@@ -38,9 +37,6 @@ class UserInfoSerializer(serializers.ModelSerializer):
 			"birthDistrict",
 			"birthCountry"]
 
-class UserIdSerializer(serializers.Serializer):
-	username = serializers.CharField(max_length=45)
-
 # Course #############################################################################
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -48,16 +44,10 @@ class CourseSerializer(serializers.ModelSerializer):
 		model = Course
 		fields = "__all__"
 
-class CourseInfoSerializer(serializers.ModelSerializer):
-	class Meta:
-		model = Course
-		fields = ["designation", "teachingResearchUnits"]
-
 # Student #############################################################################
 
 class StudentSerializer(serializers.ModelSerializer):
 	user = UserSerializer()
-	course = CourseSerializer()
 
 	@transaction.atomic
 	def create(self, validated_data):
@@ -65,15 +55,8 @@ class StudentSerializer(serializers.ModelSerializer):
 		userData = validated_data.pop('user')
 		user = User.objects.create(**userData)
 
-		#Create course in DB
-		courseData = validated_data.pop('course')
-		try:
-		    course = Course.objects.get(**courseData)
-		except Course.DoesNotExist:
-			course = Course.objects.create(**courseData)
-
 		#Create student given the user and course created and also the rest of vars
-		student = Student.objects.create(user=user, course=course, **validated_data)
+		student = Student.objects.create(user=user, **validated_data)
 		return student
 
 	class Meta:
@@ -82,7 +65,6 @@ class StudentSerializer(serializers.ModelSerializer):
 
 class StudentInfoSerializer(serializers.ModelSerializer):
 	user = UserInfoSerializer()
-	course = CourseInfoSerializer()
 
 	class Meta:
 		model = Student
