@@ -15,13 +15,8 @@ class UserSerializer(serializers.ModelSerializer):
 			"username",
 			"password",
 			"first_name",
-			"last_name",
 			"fullName",
-			"birthDate",
-			"birthParish",
-			"birthMunicipality",
-			"birthDistrict",
-			"birthCountry"]
+			"birthdate"]
 
 class UserInfoSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -29,13 +24,8 @@ class UserInfoSerializer(serializers.ModelSerializer):
 		fields = [
 			"username",
 			"first_name",
-			"last_name",
 			"fullName",
-			"birthDate",
-			"birthParish",
-			"birthMunicipality",
-			"birthDistrict",
-			"birthCountry"]
+			"birthdate"]
 
 # Course #############################################################################
 
