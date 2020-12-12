@@ -43,9 +43,10 @@ urlpatterns = [
     path("general/", include("general.urls")),
     path("library/", include("library.urls")),
     path("cafeteria/", include("cafeteria.urls")),
-    path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url('favicon.ico')))
+    path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url('favicon.ico'))),  # Returns the default icon(prevents error message)
 ]
 
+# Used to serve images
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL,
                           document_root=settings.MEDIA_ROOT)

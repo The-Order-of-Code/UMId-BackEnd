@@ -29,20 +29,28 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-INSTALLED_APPS = [
-    'cafeteria',
-    'general',
-    'library',
-    'rest_framework',
-    'rest_framework.authtoken',
+DEFAULT_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+]
+
+LOCAL_APPS = [
+    'cafeteria',
+    'general',
+    'library',
+]
+
+THIRD_PARTY_APPS = [
+    'rest_framework',  # Rest framework
+    'rest_framework.authtoken',
     'django_cleanup.apps.CleanupConfig',  # This implements replacing images
 ]
+
+INSTALLED_APPS = DEFAULT_APPS + LOCAL_APPS + THIRD_PARTY_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -95,6 +103,9 @@ AUTH_USER_MODEL = 'general.User'
 # Maximum request sizes
 DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440  # 2.5MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 2621440  # 2.5MB
+
+# Custom - Hard limit of PP size
+PROFILE_PICTURE_UPLOAD_MAX_SIZE = 2621440  # 2.5MB
 
 # Defines where we store our media and the url to service it
 MEDIA_URL = '/media/'

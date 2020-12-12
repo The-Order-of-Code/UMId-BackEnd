@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from general.validators import validate_image_size
 
 
 class Course(models.Model):
@@ -13,7 +14,7 @@ class Course(models.Model):
 class User(AbstractUser):
 	fullName = models.CharField(max_length=300)
 	birthdate = models.DateField()
-	picture = models.ImageField(default='static/defaultAvatar.png', upload_to='profilepictures/')
+	picture = models.ImageField(default='static/defaultAvatar.png', upload_to='profilepictures/', validators=[validate_image_size])
 	REQUIRED_FIELDS = ['fullName', 'birthdate']
 
 	def __str__(self):
