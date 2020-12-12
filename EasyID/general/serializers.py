@@ -27,13 +27,6 @@ class UserInfoSerializer(serializers.ModelSerializer):
 			"fullName",
 			"birthdate"]
 
-# Course #############################################################################
-
-class CourseSerializer(serializers.ModelSerializer):
-	class Meta:
-		model = Course
-		fields = "__all__"
-
 # Student #############################################################################
 
 class StudentSerializer(serializers.ModelSerializer):
@@ -69,6 +62,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
 	def create(self, validated_data):
 		#Create user in DB
 		userData = validated_data.pop('user')
+		userData.is_staff = True
 		user = User.objects.create(**userData)
 
 		#Create employee given the user and the rest of vars
@@ -84,4 +78,11 @@ class EmployeeInfoSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Employee
+		fields = "__all__"
+
+# Course #############################################################################
+
+class CourseSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Course
 		fields = "__all__"
