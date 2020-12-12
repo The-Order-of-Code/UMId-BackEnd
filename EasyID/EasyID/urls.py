@@ -15,6 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.staticfiles.storage import staticfiles_storage
+from django.views.generic.base import RedirectView
+from django.conf import settings
+from django.conf.urls.static import static
 
 ############ Only to have all paths in main page, idk how else to do it ########################################
 from general.views import UserViewSet, CourseViewSet, StudentViewSet, EmployeeViewSet
@@ -39,4 +43,9 @@ urlpatterns = [
     path("general/", include("general.urls")),
     path("library/", include("library.urls")),
     path("cafeteria/", include("cafeteria.urls")),
+    path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url('favicon.ico')))
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)

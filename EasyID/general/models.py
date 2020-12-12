@@ -13,6 +13,8 @@ class Course(models.Model):
 class User(AbstractUser):
 	fullName = models.CharField(max_length=300)
 	birthdate = models.DateField()
+	picture = models.ImageField(default='static/defaultAvatar.png', upload_to='profilepictures/')
+	REQUIRED_FIELDS = ['fullName', 'birthdate']
 
 	def __str__(self):
 		return self.username
@@ -26,7 +28,7 @@ class Student(models.Model):
 	academicYear = models.IntegerField()
 	
 	def __str__(self):
-		return self.name
+		return self.user.username
 
 
 class Employee(models.Model):
