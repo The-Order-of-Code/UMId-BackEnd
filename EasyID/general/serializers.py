@@ -18,6 +18,14 @@ class UserSerializer(serializers.ModelSerializer):
 			"fullName",
 			"birthdate"]
 
+	@transaction.atomic
+	def create(self, validated_data):
+		#Create user in DB
+		user = User.objects.create(**validated_data)
+		user.set_password(user.password)
+		user.save()
+		return user
+
 class UserInfoSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = User
@@ -37,6 +45,8 @@ class StudentSerializer(serializers.ModelSerializer):
 		#Create user in DB
 		userData = validated_data.pop('user')
 		user = User.objects.create(**userData)
+		user.set_password(user.password)
+		user.save()
 
 		#Create student given the user and course created and also the rest of vars
 		student = Student.objects.create(user=user, **validated_data)
@@ -62,8 +72,10 @@ class EmployeeSerializer(serializers.ModelSerializer):
 	def create(self, validated_data):
 		#Create user in DB
 		userData = validated_data.pop('user')
-		userData.is_staff = True
 		user = User.objects.create(**userData)
+		user.is_staff = True
+		user.set_password(user.password)
+		user.save()
 
 		#Create employee given the user and the rest of vars
 		employee = Employee.objects.create(user=user, **validated_data)
