@@ -1,10 +1,14 @@
 from django.shortcuts import render
 from .models import User, Course, Student, Employee
-from .serializers import UserSerializer, CourseSerializer, StudentSerializer, EmployeeSerializer
+from library.models import Reservation
+from cafeteria.models import TicketWallet
+from .serializers import UserSerializer, CourseSerializer, StudentSerializer, EmployeeSerializer, AllSerializer
 from .serializers import UserInfoSerializer, StudentInfoSerializer, EmployeeInfoSerializer
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.response import Response
 from rest_framework import viewsets
+from collections import namedtuple
 
 # Create your views here.
 
@@ -74,3 +78,18 @@ class CourseViewSet(viewsets.ModelViewSet):
 	serializer_class = CourseSerializer
 	authentication_classes = [SessionAuthentication, BasicAuthentication]
 	permission_classes = [IsAuthenticated, IsAdminUser]
+
+Attributes = namedtuple("Attributes", ("user", "reservations", "ticketWallet"))
+
+class AllViewSet(viewsets.ViewSet):
+	authentication_classes = [SessionAuthentication, BasicAuthentication]
+	permission_classes = [IsAuthenticated]
+
+	def list(self, request):
+		attributes = Attributes(
+			user=User.objects.all().filter(id=self.request.user.id)[0],
+			reservations=Reservation.objects.all().filter(user=self.request.user),
+			ticketWallet=TicketWallet.objects.all().filter(user=self.request.user)[0],
+		)
+		serializer = AllSerializer(attributes)
+		return Response(serializer.data)

@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from django.db import transaction
 from .models import User, Course, Student, Employee
+from library.serializers import ReservationSerializer
+from cafeteria.serializers import TicketWalletSerializer
 
 #Normal serializer for create, update, etc...
 #Info serializer for gets
@@ -98,3 +100,10 @@ class CourseSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Course
 		fields = "__all__"
+
+# All #############################################################################
+
+class AllSerializer(serializers.Serializer):
+	user = UserInfoSerializer()
+	reservations = ReservationSerializer(many=True)
+	ticketWallet = TicketWalletSerializer()
