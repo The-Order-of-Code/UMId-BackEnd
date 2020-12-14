@@ -104,6 +104,6 @@ class CourseSerializer(serializers.ModelSerializer):
 # All #############################################################################
 
 class AllSerializer(serializers.Serializer):
-	user = UserInfoSerializer()
+	user = UserSerializer(many=True)
 	reservations = ReservationSerializer(many=True)
-	ticketWallet = TicketWalletSerializer()
+	ticketWallet = TicketWalletSerializer(many=True)

@@ -2,13 +2,16 @@ from django.shortcuts import render
 from .models import User, Course, Student, Employee
 from library.models import Reservation
 from cafeteria.models import TicketWallet
+from pki.pki import getUserHashCertificate
 from .serializers import UserSerializer, CourseSerializer, StudentSerializer, EmployeeSerializer, AllSerializer
 from .serializers import UserInfoSerializer, StudentInfoSerializer, EmployeeInfoSerializer
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
+from rest_framework import status
 from rest_framework import viewsets
 from collections import namedtuple
+import json
 
 # Create your views here.
 
@@ -79,6 +82,10 @@ class CourseViewSet(viewsets.ModelViewSet):
 	authentication_classes = [SessionAuthentication, BasicAuthentication]
 	permission_classes = [IsAuthenticated, IsAdminUser]
 
+
+# All ################################################################################################################
+
+
 Attributes = namedtuple("Attributes", ("user", "reservations", "ticketWallet"))
 
 class AllViewSet(viewsets.ViewSet):
@@ -86,10 +93,20 @@ class AllViewSet(viewsets.ViewSet):
 	permission_classes = [IsAuthenticated]
 
 	def list(self, request):
-		attributes = Attributes(
-			user=User.objects.all().filter(id=self.request.user.id)[0],
-			reservations=Reservation.objects.all().filter(user=self.request.user),
-			ticketWallet=TicketWallet.objects.all().filter(user=self.request.user)[0],
-		)
-		serializer = AllSerializer(attributes)
-		return Response(serializer.data)
+		if "csr" in self.request.data:
+			attributes = Attributes(
+				user=User.objects.all().filter(username=self.request.user.username),
+				reservations=Reservation.objects.all().filter(user=self.request.user),
+				ticketWallet=TicketWallet.objects.all().filter(user=self.request.user)
+			)
+			serializer = AllSerializer(attributes)
+
+			userDict = json.loads(json.dumps(serializer.data))["user"][0]
+			csr = self.request.data["csr"]
+			(userHash, userCertificate) = getUserHashCertificate(userDict, csr)
+
+			serializerCsr = {"userHash": userHash, "userCertificate": userCertificate}
+			serializerCsr.update(serializer.data)
+			return Response(serializerCsr)
+
+		return Response("No CSR data found", status=status.HTTP_400_BAD_REQUEST)
