@@ -1,23 +1,21 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
-
-class UserType(models.Model):
-	designation = models.CharField(max_length=45)
-	
-	def __str__(self):
-		return self.designation
+from general.validators import validate_image_size
 
 
 class Course(models.Model):
-	designation = models.CharField(max_length=45)
+	designation = models.CharField(max_length=45, unique=True)
+	teachingResearchUnits = models.CharField(max_length=45)
 	
 	def __str__(self):
 		return self.designation
 
 
 class User(AbstractUser):
-	pass
+	fullName = models.CharField(max_length=300)
+	birthdate = models.DateField()
+	picture = models.ImageField(default='static/defaultAvatar.png', upload_to='profilepictures/', validators=[validate_image_size])
+	REQUIRED_FIELDS = ['fullName', 'birthdate']
 
 	def __str__(self):
 		return self.username
@@ -25,14 +23,13 @@ class User(AbstractUser):
 
 class Student(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-	number = models.IntegerField()
-	birthdate = models.DateField()
-	# ofAge = models.BooleanField(default=False) #Será necessário ter isto se temos a data de nascimento?
-	year = models.IntegerField()
 	course = models.ForeignKey(Course, null=True, on_delete=models.SET_NULL)
+	number = models.IntegerField()
+	year = models.IntegerField()
+	academicYear = models.IntegerField()
 	
 	def __str__(self):
-		return self.name
+		return self.user.username
 
 
 class Employee(models.Model):

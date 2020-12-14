@@ -8,7 +8,7 @@ class Room(models.Model):
 	capacity = models.IntegerField()
 	
 	def __str__(self):
-		return self.number
+		return str(self.number)
 
 
 class Reservation(models.Model):

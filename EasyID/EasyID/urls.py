@@ -14,8 +14,39 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.contrib.staticfiles.storage import staticfiles_storage
+from django.views.generic.base import RedirectView
+from django.conf import settings
+from django.conf.urls.static import static
+
+############ Only to have all paths in main page, idk how else to do it ########################################
+from general.views import UserViewSet, CourseViewSet, StudentViewSet, EmployeeViewSet
+from library.views import RoomViewSet, ReservationViewSet
+from cafeteria.views import TicketViewSet, TicketWalletViewSet
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register("users", UserViewSet, basename="users")
+router.register("courses", CourseViewSet, basename="courses")
+router.register("students", StudentViewSet, basename="students")
+router.register("employees", EmployeeViewSet, basename="employees")
+router.register("rooms", RoomViewSet, basename="rooms")
+router.register("reservations", ReservationViewSet, basename="reservations")
+router.register("tickets", TicketViewSet, basename="tickets")
+router.register("ticketWallets", TicketWalletViewSet, basename="ticketWallets")
+############ Only to have all paths in main page, idk how else to do it ########################################
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("", include(router.urls)),
+    path("general/", include("general.urls")),
+    path("library/", include("library.urls")),
+    path("cafeteria/", include("cafeteria.urls")),
+    path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url('favicon.ico'))),  # Returns the default icon(prevents error message)
 ]
+
+# Used to serve images
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)
