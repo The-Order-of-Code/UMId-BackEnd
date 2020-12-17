@@ -21,9 +21,9 @@ class TicketType(models.Model):
 class Ticket(models.Model):
     type = models.ForeignKey(TicketType, on_delete=models.PROTECT)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    code = models.CharField(max_length=45, null=True)
-    date = models.DateField(null=True)
-    hash = models.CharField(max_length=45, null=True)
+    code = models.CharField(max_length=45, blank=True)
+    date = models.DateField(null=True, blank=True)
+    hash = models.CharField(max_length=45, blank=True)
 
     def __str__(self):
         return f"{self.user.username}'s {self.type.name} ticket"
