@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Room, Reservation
+from .models import *
 from general.models import User
 
 # Room #############################################################################

@@ -3,5 +3,6 @@ from .models import *
 
 # Register your models here.
 
+admin.site.register(Profile)
+admin.site.register(TicketType)
 admin.site.register(Ticket)
-admin.site.register(TicketWallet)

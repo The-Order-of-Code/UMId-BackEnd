@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from .models import Room, Reservation
-from .serializers import RoomSerializer, ReservationSerializer
+from .models import *
+from .serializers import *
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework import viewsets
@@ -21,7 +21,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
 
 	def get_queryset(self):
 		if self.request.user.is_authenticated:
-			if self.request.user.is_superuser:
+			if self.request.user.is_staff:
 				return Reservation.objects.all()
 			else:
 				return Reservation.objects.all().filter(user=self.request.user)

@@ -19,7 +19,7 @@ from django.urls import path, include
 ############ Only to have all paths in main page, idk how else to do it ########################################
 from general.views import UserViewSet, CourseViewSet, StudentViewSet, EmployeeViewSet, AllViewSet
 from library.views import RoomViewSet, ReservationViewSet
-from cafeteria.views import TicketViewSet, TicketWalletViewSet
+from cafeteria.views import TicketViewSet, TicketTypeViewSet, ProfileViewSet
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
@@ -31,7 +31,8 @@ router.register("all", AllViewSet, basename="all")
 router.register("rooms", RoomViewSet, basename="rooms")
 router.register("reservations", ReservationViewSet, basename="reservations")
 router.register("tickets", TicketViewSet, basename="tickets")
-router.register("ticketWallets", TicketWalletViewSet, basename="ticketWallets")
+router.register("ticketTypes", TicketTypeViewSet, basename="ticketTypes")
+router.register("profiles", ProfileViewSet, basename="profiles")
 ############ Only to have all paths in main page, idk how else to do it ########################################
 
 urlpatterns = [

@@ -1,23 +1,30 @@
 from rest_framework import serializers
-from .models import Ticket, TicketWallet
+from .models import *
 from general.models import User
 
 # Ticket #############################################################################
 
 class TicketSerializer(serializers.ModelSerializer):
+	def create(self, validated_data):
+		username = self.context.get('request', None).user.username
+		user = User.objects.get(username=username)
+		ticket = Ticket.objects.create(user=user, **validated_data)
+		return ticket
+
 	class Meta:
 		model = Ticket
+		fields = ["type", "code", "date", "hash"]
+
+# TicketType #############################################################################
+
+class TicketTypeSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = TicketType
 		fields = "__all__"
 
-# TicketWallet #############################################################################
+# Profile #############################################################################
 
-class TicketWalletSerializer(serializers.ModelSerializer):
-	def create(self, validated_data):
-		userId = self.context.get('request', None).user.id
-		user = User.objects.get(id=userId)
-		ticketWallet = TicketWallet.objects.create(user=user, **validated_data)
-		return ticketWallet
-
+class ProfileSerializer(serializers.ModelSerializer):
 	class Meta:
-		model = TicketWallet
-		fields = ["amount", "ticket"]
+		model = Profile
+		fields = "__all__"

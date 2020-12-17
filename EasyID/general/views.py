@@ -1,10 +1,9 @@
 from django.shortcuts import render
-from .models import User, Course, Student, Employee
+from .models import *
 from library.models import Reservation
-from cafeteria.models import TicketWallet
+from cafeteria.models import Ticket
 from pki.pki import getUserHashCertificate
-from .serializers import UserSerializer, CourseSerializer, StudentSerializer, EmployeeSerializer, AllSerializer
-from .serializers import UserInfoSerializer, StudentInfoSerializer, EmployeeInfoSerializer
+from .serializers import *
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
@@ -45,10 +44,10 @@ class UserViewSet(viewsets.ModelViewSet):
 
 	def get_queryset(self):
 		if self.request.user.is_authenticated:
-			if self.request.user.is_superuser:
+			if self.request.user.is_staff:
 				return User.objects.all()
 			else:
-				return User.objects.all().filter(id=self.request.user.id)
+				return User.objects.all().filter(username=self.request.user.username)
 
 class StudentViewSet(viewsets.ModelViewSet):
 	def get_serializer_class(self):
@@ -59,10 +58,10 @@ class StudentViewSet(viewsets.ModelViewSet):
 
 	def get_queryset(self):
 		if self.request.user.is_authenticated:
-			if self.request.user.is_superuser:
+			if self.request.user.is_staff:
 				return Student.objects.all()
 			else:
-				return Student.objects.all().filter(id=self.request.user.id)
+				return Student.objects.all().filter(username=self.request.username)
 
 class EmployeeViewSet(viewsets.ModelViewSet):
 	queryset = Employee.objects.all()
@@ -86,7 +85,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 # All ################################################################################################################
 
 
-Attributes = namedtuple("Attributes", ("user", "reservations", "ticketWallet"))
+Attributes = namedtuple("Attributes", ("user", "reservations", "tickets"))
 
 class AllViewSet(viewsets.ViewSet):
 	authentication_classes = [SessionAuthentication, BasicAuthentication]
@@ -97,7 +96,7 @@ class AllViewSet(viewsets.ViewSet):
 			attributes = Attributes(
 				user=User.objects.all().filter(username=self.request.user.username),
 				reservations=Reservation.objects.all().filter(user=self.request.user),
-				ticketWallet=TicketWallet.objects.all().filter(user=self.request.user)
+				tickets=Ticket.objects.all().filter(user=self.request.user)
 			)
 			serializer = AllSerializer(attributes)
 
