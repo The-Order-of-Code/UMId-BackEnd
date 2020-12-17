@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'cafeteria',
+    'cafeteria2',
     'general',
     'library',
     'rest_framework',
