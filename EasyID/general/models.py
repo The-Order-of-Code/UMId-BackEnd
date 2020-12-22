@@ -11,8 +11,26 @@ class Course(models.Model):
 
 
 class User(AbstractUser):
+	class UserType(models.TextChoices):
+		NONE = "NONE", "NONE"
+		STUDENT = "STUDENT", "STUDENT"
+		EMPLOYEE = "EMPLOYEE", "EMPLOYEE"
+
+	userType = models.CharField(choices=UserType.choices, default=UserType.NONE, max_length=20)
 	fullName = models.CharField(max_length=300)
 	birthdate = models.DateField()
+
+	def isStudent(self):
+		return self.userType in {self.UserType.STUDENT}
+
+	def setStudent(self):
+		self.userType = self.UserType.STUDENT
+
+	def isEmployee(self):
+		return self.userType in {self.UserType.EMPLOYEE}
+
+	def setEmployee(self):
+		self.userType = self.UserType.EMPLOYEE
 
 	def __str__(self):
 		return self.username

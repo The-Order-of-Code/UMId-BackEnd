@@ -4,16 +4,13 @@ from .models import *
 from library.serializers import ReservationSerializer
 from cafeteria.serializers import TicketSerializer
 
-#Normal serializer for create, update, etc...
-#Info serializer for gets
-#Maybe find a better way to do this later
-
 # User #############################################################################
 
 class UserSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = User
 		fields = [
+			"userType",
 			"username",
 			"password",
 			"first_name",
@@ -23,6 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
 	@transaction.atomic
 	def create(self, validated_data):
 		#Create user in DB
+		userType = validated_data.pop('userType')
 		user = User.objects.create(**validated_data)
 		user.set_password(user.password)
 		user.save()
@@ -32,6 +30,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = User
 		fields = [
+			"userType",
 			"username",
 			"first_name",
 			"fullName",
@@ -47,6 +46,7 @@ class StudentSerializer(serializers.ModelSerializer):
 		#Create user in DB
 		userData = validated_data.pop('user')
 		user = User.objects.create(**userData)
+		user.setStudent()
 		user.set_password(user.password)
 		user.save()
 
@@ -75,6 +75,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
 		#Create user in DB
 		userData = validated_data.pop('user')
 		user = User.objects.create(**userData)
+		user.setEmployee()
 		user.is_staff = True
 		user.set_password(user.password)
 		user.save()
@@ -103,7 +104,12 @@ class CourseSerializer(serializers.ModelSerializer):
 
 # All #############################################################################
 
-class AllSerializer(serializers.Serializer):
-	user = UserSerializer(many=True)
+class StudentAllSerializer(serializers.Serializer):
+	user = StudentSerializer()
+	reservations = ReservationSerializer(many=True)
+	tickets = TicketSerializer(many=True)
+
+class EmployeeAllSerializer(serializers.Serializer):
+	user = EmployeeSerializer()
 	reservations = ReservationSerializer(many=True)
 	tickets = TicketSerializer(many=True)

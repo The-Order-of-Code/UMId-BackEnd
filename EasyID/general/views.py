@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import viewsets
+from rest_framework import generics, mixins
 from collections import namedtuple
 import json
 
@@ -35,11 +36,13 @@ import json
 }
 """
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
+										   mixins.CreateModelMixin,
+										   mixins.RetrieveModelMixin):
 	def get_serializer_class(self):
 		if self.action == "list" or self.action == "retrieve":
 			return UserInfoSerializer
-		else:
+		elif self.action == "create":
 			return UserSerializer
 
 	def get_queryset(self):
@@ -49,11 +52,13 @@ class UserViewSet(viewsets.ModelViewSet):
 			else:
 				return User.objects.all().filter(username=self.request.user.username)
 
-class StudentViewSet(viewsets.ModelViewSet):
+class StudentViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
+											  mixins.CreateModelMixin,
+											  mixins.RetrieveModelMixin):
 	def get_serializer_class(self):
 		if self.action == "list" or self.action == "retrieve":
 			return StudentInfoSerializer
-		else:
+		elif self.action == "create":
 			return StudentSerializer
 
 	def get_queryset(self):
@@ -63,7 +68,9 @@ class StudentViewSet(viewsets.ModelViewSet):
 			else:
 				return Student.objects.all().filter(username=self.request.username)
 
-class EmployeeViewSet(viewsets.ModelViewSet):
+class EmployeeViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
+											   mixins.CreateModelMixin,
+											   mixins.RetrieveModelMixin):
 	queryset = Employee.objects.all()
 	#Remove comments after testing, this is just to create admins easily
 	#authentication_classes = [SessionAuthentication, BasicAuthentication]
@@ -72,7 +79,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 	def get_serializer_class(self):
 		if self.action == "list" or self.action == "retrieve":
 			return EmployeeInfoSerializer
-		else:
+		elif self.action == "create":
 			return EmployeeSerializer
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -93,19 +100,33 @@ class AllViewSet(viewsets.ViewSet):
 
 	def list(self, request):
 		if "csr" in self.request.data:
-			attributes = Attributes(
-				user=User.objects.all().filter(username=self.request.user.username),
-				reservations=Reservation.objects.all().filter(user=self.request.user),
-				tickets=Ticket.objects.all().filter(user=self.request.user)
-			)
-			serializer = AllSerializer(attributes)
+			#Get user and send data to serializer of its type
+			user = User.objects.all().get(username=self.request.user.username)
+			if user.isStudent():
+				attributes = Attributes(
+					user=Student.objects.all().get(user=self.request.user),
+					reservations=Reservation.objects.all().filter(user=self.request.user),
+					tickets=Ticket.objects.all().filter(user=self.request.user)
+				)
+				serializer = StudentAllSerializer(attributes)
+			elif user.isEmployee():
+				attributes = Attributes(
+					user=Employee.objects.all().get(user=self.request.user),
+					reservations=Reservation.objects.all().filter(user=self.request.user),
+					tickets=Ticket.objects.all().filter(user=self.request.user)
+				)
+				serializer = EmployeeAllSerializer(attributes)
+			else:
+				return Response("User type not allowed", status=status.HTTP_401_UNAUTHORIZED)
 
-			userDict = json.loads(json.dumps(serializer.data))["user"][0]
+			#Get user data from serializer and get check hash/certificate
+			userDict = json.loads(json.dumps(serializer.data))["user"]
 			csr = self.request.data["csr"]
 			(userHash, userCertificate) = getUserHashCertificate(userDict, csr)
 
+			#Add hash/certificate to serializer data and send response
 			serializerCsr = {"userHash": userHash, "userCertificate": userCertificate}
 			serializerCsr.update(serializer.data)
 			return Response(serializerCsr)
-
-		return Response("No CSR data found", status=status.HTTP_400_BAD_REQUEST)
+		else:
+			return Response("No CSR data found", status=status.HTTP_400_BAD_REQUEST)
