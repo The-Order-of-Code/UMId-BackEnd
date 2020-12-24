@@ -4,6 +4,7 @@ from general.models import User
 
 # Ticket #############################################################################
 
+
 class TicketSerializer(serializers.ModelSerializer):
 	def create(self, validated_data):
 		username = self.context.get('request', None).user.username
@@ -17,12 +18,14 @@ class TicketSerializer(serializers.ModelSerializer):
 
 # TicketType #############################################################################
 
+
 class TicketTypeSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = TicketType
 		fields = "__all__"
 
 # Profile #############################################################################
+
 
 class ProfileSerializer(serializers.ModelSerializer):
 	class Meta:

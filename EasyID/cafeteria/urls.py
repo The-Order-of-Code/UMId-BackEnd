@@ -9,4 +9,5 @@ router.register("profiles", ProfileViewSet, basename="profiles")
 
 urlpatterns = [
     path("", include(router.urls)),
+    path("validateTicket", validateTicket)
 ]

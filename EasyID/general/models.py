@@ -20,6 +20,8 @@ class User(AbstractUser):
 	fullName = models.CharField(max_length=300)
 	birthdate = models.DateField()
 
+	REQUIRED_FIELDS = ['birthdate']
+
 	def isStudent(self):
 		return self.userType in {self.UserType.STUDENT}
 
