@@ -1,4 +1,5 @@
 
+
 # Created by https://www.toptal.com/developers/gitignore/api/django,pycharm,sublimetext
 # Edit at https://www.toptal.com/developers/gitignore?templates=django,pycharm,sublimetext
 
@@ -12,7 +13,9 @@ __pycache__/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-media
+EasyID/media/*
+!EasyID/media/static
+
 
 # If your build process includes running collectstatic, then you probably don't need or want to include staticfiles/
 # in your Git repository. Update and uncomment the following line accordingly.

@@ -11,10 +11,10 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -27,15 +27,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
-INSTALLED_APPS = [
-    'cafeteria',
-    'general',
-    'library',
-    'rest_framework',
-    'rest_framework.authtoken',
+DEFAULT_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,6 +37,20 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+
+LOCAL_APPS = [
+    'cafeteria',
+    'general',
+    'library',
+]
+
+THIRD_PARTY_APPS = [
+    'rest_framework',  # Rest framework
+    'rest_framework.authtoken',
+    'django_cleanup.apps.CleanupConfig',  # This implements replacing images
+]
+
+INSTALLED_APPS = DEFAULT_APPS + LOCAL_APPS + THIRD_PARTY_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -75,7 +83,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'EasyID.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
@@ -90,7 +97,20 @@ DATABASES = {
     }
 }
 
+# Makes general.User the default user
 AUTH_USER_MODEL = 'general.User'
+
+# Maximum request sizes
+DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440  # 2.5MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 2621440  # 2.5MB
+
+# Custom - Hard limit of PP size
+PROFILE_PICTURE_UPLOAD_MAX_SIZE = 2621440  # 2.5MB
+
+# Defines where we store our media and the url to service it
+MEDIA_URL = '/media/'
+MEDIA_ROOT = (os.path.join(BASE_DIR, 'media/'))
+
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
@@ -109,7 +129,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
@@ -123,8 +142,9 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
