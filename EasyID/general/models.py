@@ -23,8 +23,6 @@ class User(AbstractUser):
 	picture = models.ImageField(default='static/defaultAvatar.png', upload_to='profilepictures/', validators=[validate_image_size])
 	REQUIRED_FIELDS = ['fullName', 'birthdate']
 
-	REQUIRED_FIELDS = ['birthdate']
-
 	def isStudent(self):
 		return self.userType in {self.UserType.STUDENT}
 
