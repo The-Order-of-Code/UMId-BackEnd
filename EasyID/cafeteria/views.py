@@ -52,7 +52,7 @@ def validateTicket(request):
         data = JSONParser().parse(request)
         try:
             payload = data['payload']
-            user = payload['id']
+            user = payload['user']
             date = payload['date']
             ttype = payload['type']
 
