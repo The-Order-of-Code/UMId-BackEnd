@@ -59,14 +59,16 @@ def validateTicket(request):
             if date:
                 ticket = Ticket.objects.filter(user=user, date=datetime.today()).first()
             else:
-                ticket = Ticket.objects.filter(user=user, type=ttype).first()
+                ticket = Ticket.objects.filter(user=user, type=ttype, date=None).first()
 
             if settings.DEBUG and 'debugdate' in payload:
                 ticket = Ticket.objects.filter(user=user, date=payload['debugdate'][:10]).first()
-                return JsonResponse(TicketSerializer(ticket).data, status=status.HTTP_200_OK)
+                if ticket:
+                    return JsonResponse(TicketSerializer(ticket).data, status=status.HTTP_200_OK)
 
             if ticket:
                 # log ticket consumption(4 later)
+                #ticket.delete()
                 return HttpResponse(status=status.HTTP_200_OK)
             else:
                 return HttpResponse(f'Ticket not found', status=status.HTTP_404_NOT_FOUND)
