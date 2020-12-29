@@ -1,11 +1,11 @@
 ## Introdução
-Os ficheiros que se encontra nesta pasta, devem ser aplicados de modo a garantir, a comunicação com o CA.
+Os ficheiros que se encontram nesta pasta, devem ser aplicados de modo a garantir a comunicação com o CA.
 
 ### Estrutura
 
-* [pki](./pki.py): Neste ficheiro é estabelecido a comunicação com CA, e permite assinar o pedido de assinatura certificado.
+* [pki](./pki.py): Neste ficheiro é estabelecido a comunicação com o CA que permite assinar o pedido de assinatura certificado.
 * [config](./config.py): Neste ficheiro encontram-se as configurações necessárias para ser estabelecida a comunicação com o CA (ex:. host, portas)
-* [ca](./ca.py): Neste ficheiro é dependências encontram-se as depedências necessárias para o funcionamento do ficheiro [pki](./pki.py)
+* [ca](./ca.py): Neste ficheiro encontram-se as depedências necessárias para o funcionamento do ficheiro [pki](./pki.py)
 * [requirements](./ca.py): Ficheiro com as depedências necessárias para intalar o pki.
 
 ### Comandos
