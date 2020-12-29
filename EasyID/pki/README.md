@@ -4,6 +4,7 @@
 
 ## Estrutura
 Nós optamos por estruturar em duas secções diferentes, o [CA](./CA/) e o [PKI](./PKI/), pois o CA, pode estar numa máquina idependente do PKI.
+Foram criados dois scripts bash para facilitar a instalação da CA. Primeiramente deve ser corrido o script.sh e de seguida o script2.sh.  
 
 ### CA
 O CA é independente do pki, na pasta do [CA](./CA/Readme.md) podemos ver os comandos necessários para inicializá-lo e estará encarregue por assinar os certificados fidedignos, e garantir a autenticidade das propriedades dos utilizadores.
