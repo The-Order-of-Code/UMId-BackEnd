@@ -1,5 +1,6 @@
 import json
 import requests
+from base64 import b64encode
 
 username = "username"
 password = "pass"
@@ -13,8 +14,12 @@ csr = "-----BEGIN CERTIFICATE REQUEST-----\n" \
       "dGf0h1QsoyRJ\n" \
       "-----END CERTIFICATE REQUEST-----\n" \
 
+credentials = username + ":" + password
+base64 = b64encode(credentials.encode('utf-8')).decode('utf-8')
+headers = {"Authorization": "Basic " + base64}
+
 session = requests.session()
-response = session.get("http://127.0.0.1:8000/general/all/",
+response = session.post("http://127.0.0.1:8000/general/all/",
 						data={"csr": csr},
-						auth=(username, password))
+						headers=headers)
 print(response.text)

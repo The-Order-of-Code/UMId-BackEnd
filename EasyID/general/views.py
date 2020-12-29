@@ -130,3 +130,7 @@ class AllViewSet(viewsets.ViewSet):
 			return Response(serializerCsr)
 		else:
 			return Response("No CSR data found", status=status.HTTP_400_BAD_REQUEST)
+
+	def create(self, request):
+		print(request.headers)
+		return self.list(request)
