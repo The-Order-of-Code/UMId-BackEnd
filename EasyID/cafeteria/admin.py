@@ -6,3 +6,4 @@ from .models import *
 admin.site.register(Profile)
 admin.site.register(TicketType)
 admin.site.register(Ticket)
+admin.site.register(TicketLog)

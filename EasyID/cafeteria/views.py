@@ -11,7 +11,9 @@ from rest_framework.decorators import api_view
 
 from django.http.response import JsonResponse, HttpResponse
 from django.conf import settings
-from datetime import datetime
+from django.utils import timezone
+
+from django.db import IntegrityError, transaction
 
 
 # Create your views here.
@@ -43,10 +45,42 @@ class ProfileViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
 
+class TicketLogViewSet(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = TicketLogSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            if self.request.user.is_staff:
+                return TicketLog.objects.all()
+            if self.request.user.isEmployee():
+                return TicketLog.objects.all().filter(employee=self.request.user)
+            else:
+                return TicketLog.objects.all().filter(user=self.request.user)
+
+
+@transaction.atomic
+def moveTicket(ticket, ticketlog):
+    with transaction.atomic():
+        print('atomic')
+        ticket.delete()
+        ticketlog.save()
+
+
 @api_view(['POST'])
 def validateTicket(request):
-    # Needs employee sent verification
-    # Needs security implemented, only validates payload
+    u = request.user
+    if u.is_authenticated:
+        print('what')
+        if User(id=u.id).isEmployee() or u.is_staff:
+            pass
+        else:
+            return HttpResponse('Not an employee', status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        return HttpResponse('Not logged in', status=status.HTTP_401_UNAUTHORIZED)
+
+    # Needs security implemented, only validates payload, assumes it's safe
 
     if request.method == 'POST':
         data = JSONParser().parse(request)
@@ -57,7 +91,7 @@ def validateTicket(request):
             ttype = payload['type']
 
             if date:
-                ticket = Ticket.objects.filter(user=user, date=datetime.today()).first()
+                ticket = Ticket.objects.filter(user=user, date=timezone.now()).first()
             else:
                 ticket = Ticket.objects.filter(user=user, type=ttype, date=None).first()
 
@@ -66,12 +100,18 @@ def validateTicket(request):
                 if ticket:
                     return JsonResponse(TicketSerializer(ticket).data, status=status.HTTP_200_OK)
 
+            print(ticket)
             if ticket:
-                # log ticket consumption(4 later)
-                #ticket.delete()
+                tl = TicketLog.fromTicket(ticket=ticket, employee=User.objects.get(id=1), operation='ayyyo')
+
+                try:
+                    moveTicket(ticket, tl)
+                except IntegrityError:
+                    return HttpResponse(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
                 return HttpResponse(status=status.HTTP_200_OK)
             else:
                 return HttpResponse(f'Ticket not found', status=status.HTTP_404_NOT_FOUND)
         except KeyError as e:
             return HttpResponse(f'Field not found: {e.args[0]}', status=status.HTTP_404_NOT_FOUND)
-    return HttpResponse('Request is not a POST',status=status.HTTP_501_NOT_IMPLEMENTED)
+    return HttpResponse('Request is not a POST', status=status.HTTP_501_NOT_IMPLEMENTED)

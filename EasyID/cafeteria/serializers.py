@@ -31,3 +31,11 @@ class ProfileSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Profile
 		fields = "__all__"
+
+# TicketLog #############################################################################
+
+
+class TicketLogSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = TicketLog
+		fields = "__all__"
