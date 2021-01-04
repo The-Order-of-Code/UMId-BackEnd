@@ -3,6 +3,7 @@ from django.db import transaction
 from .models import *
 from library.serializers import ReservationSerializer
 from cafeteria.serializers import TicketSerializer
+from django.conf import settings
 
 # Course #############################################################################
 
@@ -51,7 +52,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
 		import base64
 		import os
 		print(obj.picture)
-		path = os.path.join('media', str(obj.picture))
+		path = os.path.join(settings.MEDIA_ROOT, str(obj.picture))
 
 		with open(path, "rb") as image_file:
 			encoded_string = base64.b64encode(image_file.read())
