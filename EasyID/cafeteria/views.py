@@ -60,6 +60,13 @@ class TicketLogViewSet(viewsets.ReadOnlyModelViewSet):
                 return TicketLog.objects.all().filter(user=self.request.user)
 
 
+def simpleJsonResponse(detail, status):
+    data = {
+        'detail': detail
+    }
+    return JsonResponse(data, status=status)
+
+
 @transaction.atomic
 def moveTicket(ticket, ticketlog):
     with transaction.atomic():
@@ -76,9 +83,9 @@ def validateTicket(request):
         if User(id=u.id).isEmployee() or u.is_staff:
             pass
         else:
-            return HttpResponse('Not an employee', status=status.HTTP_401_UNAUTHORIZED)
+            return simpleJsonResponse('Not an employee', status=status.HTTP_401_UNAUTHORIZED)
     else:
-        return HttpResponse('Not logged in', status=status.HTTP_401_UNAUTHORIZED)
+        return simpleJsonResponse('Not logged in', status=status.HTTP_401_UNAUTHORIZED)
 
     # Needs security implemented, only validates payload, assumes it's safe
 
@@ -86,9 +93,12 @@ def validateTicket(request):
         data = JSONParser().parse(request)
         try:
             payload = data['payload']
-            user = payload['user']
+            username = payload['user']
             date = payload['date']
-            ttype = payload['type']
+            ttypename = payload['type']
+
+            user = User.objects.get(username=username)
+            ttype = TicketType.objects.get(name=ttypename)
 
             if date:
                 ticket = Ticket.objects.filter(user=user, date=timezone.now()).first()
@@ -111,7 +121,11 @@ def validateTicket(request):
 
                 return HttpResponse(status=status.HTTP_200_OK)
             else:
-                return HttpResponse(f'Ticket not found', status=status.HTTP_404_NOT_FOUND)
+                return simpleJsonResponse(f'Ticket not found', status=status.HTTP_404_NOT_FOUND)
         except KeyError as e:
-            return HttpResponse(f'Field not found: {e.args[0]}', status=status.HTTP_404_NOT_FOUND)
-    return HttpResponse('Request is not a POST', status=status.HTTP_501_NOT_IMPLEMENTED)
+            return simpleJsonResponse(f'Field not found: {e.args[0]}', status=status.HTTP_404_NOT_FOUND)
+        except User.DoesNotExist as e:
+            return simpleJsonResponse(fr'User with username {username} not found', status=status.HTTP_404_NOT_FOUND)
+        except TicketType.DoesNotExist as e:
+            return simpleJsonResponse(fr'TicketType with name {ttypename} not found', status=status.HTTP_404_NOT_FOUND)
+    return simpleJsonResponse('Request is not a POST', status=status.HTTP_501_NOT_IMPLEMENTED)

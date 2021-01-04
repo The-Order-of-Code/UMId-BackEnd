@@ -11,7 +11,7 @@ class Profile(models.Model):
 
 class TicketType(models.Model):
 	profiles = models.ManyToManyField(Profile)
-	name = models.CharField(max_length=45)
+	name = models.CharField(max_length=45, unique=True)
 	price = models.DecimalField(max_digits=5, decimal_places=2)
 
 	def __str__(self):
