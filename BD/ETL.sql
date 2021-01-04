@@ -1,4 +1,4 @@
--- Povoamento Da Nossa BD
+-- Povoamento da nossa BD (easyid)
 
 USE easyid;
 
@@ -37,12 +37,12 @@ BEGIN
 	END IF;
  
 	-- Preencher User
-    INSERT INTO easyid.general_user(`password`, `is_superuser`, `username`, `first_name`, `last_name`, `email`, `is_staff`, `is_active`, `date_joined`, `fullName`, `birthDate`, `birthParish`, `birthMunicipality`, `birthDistrict`, `birthCountry`)
-    VALUES ('password', 0, CONVERT(v_idAluno,CHAR), v_nome, v_apelido, v_email, 1, 0, '2020-01-01 20:00:00', CONCAT(v_nome,CONCAT(" ",v_apelido)), v_data_nascimento, 'birthParish', 'birthMunicipality', 'birthDistrict', 'birthCountry');
-	
+    INSERT INTO easyid.general_user(`password`, `is_superuser`, `username`, `first_name`, `last_name`, `email`, `is_staff`, `is_active`, `date_joined`, `userType`, `fullName`, `birthDate`, `picture`)
+    VALUES (LEFT(UUID(), 8), 0, CONCAT(v_nome,CONCAT(v_apelido,v_idAluno)), v_nome, v_apelido, v_email, 0, 1, CURRENT_TIMESTAMP(), 'STUDENT', CONCAT(v_nome,CONCAT(" ",v_apelido)), v_data_nascimento, 'static/defaultAvatar.png');
+    
     -- Preencher Student
-    INSERT INTO easyid.general_student (`user_id`, `number`, `year`, `academicYear`, `edition`, `specialStatuses`, `studyPlan`, `course_id`)
-    VALUES (LAST_INSERT_ID(), v_numero, YEAR(v_ano_inscricao), v_ano_inscrito, 0, 'specialStatuses', 'studyPlan', v_idCurso);
+    INSERT INTO easyid.general_student (`user_id`, `number`, `year`, `academicYear`, `course_id`)
+    VALUES (LAST_INSERT_ID(), v_numero, YEAR(v_ano_inscricao), v_ano_inscrito, v_idCurso);
     
     COMMIT;
  
@@ -85,9 +85,9 @@ BEGIN
 	END IF;
  
 	-- Preencher User
-    INSERT INTO easyid.general_user(`password`, `is_superuser`, `username`, `first_name`, `last_name`, `email`, `is_staff`, `is_active`, `date_joined`, `fullName`, `birthDate`, `birthParish`, `birthMunicipality`, `birthDistrict`, `birthCountry`)
-    VALUES ('password', 0, CONVERT(v_idFuncionario,CHAR), v_nome, v_apelido, v_email, 0, 0, '2020-01-01 20:00:00', CONCAT(v_nome,CONCAT(" ",v_apelido)), v_data_nascimento, 'birthParish', 'birthMunicipality', 'birthDistrict', 'birthCountry');
-	
+    INSERT INTO easyid.general_user(`password`, `is_superuser`, `username`, `first_name`, `last_name`, `email`, `is_staff`, `is_active`, `date_joined`, `userType`, `fullName`, `birthDate`, `picture`)
+    VALUES (LEFT(UUID(), 8), 1, CONCAT(v_nome,CONCAT(v_apelido,v_idFuncionario)), v_nome, v_apelido, v_email, 1, 1, CURRENT_TIMESTAMP(), 'EMPLOYEE', CONCAT(v_nome,CONCAT(" ",v_apelido)), v_data_nascimento, 'static/defaultAvatar.png');
+
     -- Preencher Employee
     INSERT INTO easyid.general_employee (`user_id`)
     VALUES (LAST_INSERT_ID());
@@ -114,6 +114,6 @@ CALL UserStudent();
 CALL UserEmployee();
 
 -- User (Professor)
-INSERT INTO easyid.general_user(`password`, `is_superuser`, `username`, `first_name`, `last_name`, `email`, `is_staff`, `is_active`, `date_joined`, `fullName`, `birthDate`, `birthParish`, `birthMunicipality`, `birthDistrict`, `birthCountry`)
-SELECT 'password', 0, (idProfessor+(SELECT MAX(id) FROM easyid.general_user)), nome, apelido, email, 1, 0, '2020-01-01 20:00:00', CONCAT(nome,CONCAT(" ",apelido)), data_nascimento, 'birthParish', 'birthMunicipality', 'birthDistrict', 'birthCountry'
+INSERT INTO easyid.general_user(`password`, `is_superuser`, `username`, `first_name`, `last_name`, `email`, `is_staff`, `is_active`, `date_joined`, `userType`, `fullName`, `birthDate`, `picture`)
+SELECT LEFT(UUID(), 8), 0, CONCAT(nome,CONCAT(apelido,idProfessor)), nome, apelido, email, 0, 1, CURRENT_TIMESTAMP(), 'NONE', CONCAT(nome,CONCAT(" ",apelido)), data_nascimento, 'static/defaultAvatar.png'
 FROM fu.professor;
