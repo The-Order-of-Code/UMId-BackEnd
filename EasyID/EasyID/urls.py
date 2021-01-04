@@ -21,9 +21,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 ############ Only to have all paths in main page, idk how else to do it ########################################
-from general.views import UserViewSet, CourseViewSet, StudentViewSet, EmployeeViewSet, AllViewSet
-from library.views import RoomViewSet, ReservationViewSet
-from cafeteria.views import TicketViewSet, TicketTypeViewSet, ProfileViewSet, TicketLogViewSet
+from general.views import *
+from library.views import *
+from cafeteria.views import *
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
