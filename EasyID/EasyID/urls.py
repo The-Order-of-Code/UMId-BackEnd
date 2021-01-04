@@ -23,7 +23,7 @@ from django.conf.urls.static import static
 ############ Only to have all paths in main page, idk how else to do it ########################################
 from general.views import UserViewSet, CourseViewSet, StudentViewSet, EmployeeViewSet, AllViewSet
 from library.views import RoomViewSet, ReservationViewSet
-from cafeteria.views import TicketViewSet, TicketTypeViewSet, ProfileViewSet
+from cafeteria.views import TicketViewSet, TicketTypeViewSet, ProfileViewSet, TicketLogViewSet
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
@@ -37,6 +37,7 @@ router.register("reservations", ReservationViewSet, basename="reservations")
 router.register("tickets", TicketViewSet, basename="tickets")
 router.register("ticketTypes", TicketTypeViewSet, basename="ticketTypes")
 router.register("profiles", ProfileViewSet, basename="profiles")
+router.register("ticketLogs", TicketLogViewSet, basename="ticketLogs")
 ############ Only to have all paths in main page, idk how else to do it ########################################
 
 urlpatterns = [

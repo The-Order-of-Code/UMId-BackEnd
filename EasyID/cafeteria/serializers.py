@@ -38,4 +38,4 @@ class ProfileSerializer(serializers.ModelSerializer):
 class TicketLogSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = TicketLog
-		fields = "__all__"
+		fields = ['user', 'type', 'consumed']
