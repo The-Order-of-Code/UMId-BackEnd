@@ -5,6 +5,11 @@ from library.serializers import ReservationSerializer
 from cafeteria.serializers import TicketSerializer
 from django.conf import settings
 
+import base64, uuid
+from django.core.files.base import ContentFile
+from rest_framework import serializers
+import os
+
 # Course #############################################################################
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -12,9 +17,31 @@ class CourseSerializer(serializers.ModelSerializer):
 		model = Course
 		fields = "__all__"
 
+
+# Custom image field - handles base 64 encoded images
+class Base64ImageField(serializers.ImageField):
+	def to_representation(self, data):
+		path = os.path.join(settings.MEDIA_ROOT, str(data))
+
+		with open(path, "rb") as image_file:
+			encoded_string = base64.b64encode(image_file.read())
+
+		return encoded_string
+
+	def to_internal_value(self, data):
+		if isinstance(data, str) and data.startswith('data:image'):
+			# base64 encoded image - decode
+			format, imgstr = data.split(';base64,') # format ~= data:image/X,
+			ext = format.split('/')[-1] # guess file extension
+			id = uuid.uuid4()
+			data = ContentFile(base64.b64decode(imgstr), name = id.urn[9:] + '.' + ext)
+		return super(Base64ImageField, self).to_internal_value(data)
+
 # User #############################################################################
 
+
 class UserSerializer(serializers.ModelSerializer):
+	picture = Base64ImageField()
 	class Meta:
 		model = User
 		fields = [
@@ -36,7 +63,7 @@ class UserSerializer(serializers.ModelSerializer):
 		return user
 
 class UserInfoSerializer(serializers.ModelSerializer):
-	picture = serializers.SerializerMethodField()
+	picture = Base64ImageField()
 
 	class Meta:
 		model = User
