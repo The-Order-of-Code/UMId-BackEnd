@@ -4,6 +4,13 @@ from .models import *
 from library.serializers import ReservationSerializer
 from cafeteria.serializers import TicketSerializer
 
+# Course #############################################################################
+
+class CourseSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Course
+		fields = "__all__"
+
 # User #############################################################################
 
 class UserSerializer(serializers.ModelSerializer):
@@ -62,6 +69,7 @@ class StudentSerializer(serializers.ModelSerializer):
 
 class StudentInfoSerializer(serializers.ModelSerializer):
 	user = UserInfoSerializer()
+	course = CourseSerializer()
 
 	class Meta:
 		model = Student
@@ -97,21 +105,14 @@ class EmployeeInfoSerializer(serializers.ModelSerializer):
 		model = Employee
 		fields = "__all__"
 
-# Course #############################################################################
-
-class CourseSerializer(serializers.ModelSerializer):
-	class Meta:
-		model = Course
-		fields = "__all__"
-
 # All #############################################################################
 
 class StudentAllSerializer(serializers.Serializer):
-	user = StudentSerializer()
+	user = StudentInfoSerializer()
 	reservations = ReservationSerializer(many=True)
 	tickets = TicketSerializer(many=True)
 
 class EmployeeAllSerializer(serializers.Serializer):
-	user = EmployeeSerializer()
+	user = EmployeeInfoSerializer()
 	reservations = ReservationSerializer(many=True)
 	tickets = TicketSerializer(many=True)
