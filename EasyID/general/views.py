@@ -94,6 +94,25 @@ class CourseViewSet(viewsets.ModelViewSet):
 
 Attributes = namedtuple("Attributes", ("user", "reservations", "tickets"))
 
+def getUserAllSerializer(username):
+	user = User.objects.all().get(username=username)
+	if user.isStudent():
+		attributes = Attributes(
+			user=Student.objects.all().get(user=user),
+			reservations=Reservation.objects.all().filter(user=user),
+			tickets=Ticket.objects.all().filter(user=user)
+		)
+		return StudentAllSerializer(attributes)
+	elif user.isEmployee():
+		attributes = Attributes(
+			user=Employee.objects.all().get(user=user),
+			reservations=Reservation.objects.all().filter(user=user),
+			tickets=Ticket.objects.all().filter(user=user)
+		)
+		return EmployeeAllSerializer(attributes)
+	else:
+		return None
+
 class AllViewSet(viewsets.ViewSet):
 	authentication_classes = [SessionAuthentication, BasicAuthentication]
 	permission_classes = [IsAuthenticated]
@@ -101,23 +120,9 @@ class AllViewSet(viewsets.ViewSet):
 	def list(self, request):
 		if "csr" in self.request.data:
 			#Get user and send data to serializer of its type
-			user = User.objects.all().get(username=self.request.user.username)
-			if user.isStudent():
-				attributes = Attributes(
-					user=Student.objects.all().get(user=self.request.user),
-					reservations=Reservation.objects.all().filter(user=self.request.user),
-					tickets=Ticket.objects.all().filter(user=self.request.user)
-				)
-				serializer = StudentAllSerializer(attributes)
-			elif user.isEmployee():
-				attributes = Attributes(
-					user=Employee.objects.all().get(user=self.request.user),
-					reservations=Reservation.objects.all().filter(user=self.request.user),
-					tickets=Ticket.objects.all().filter(user=self.request.user)
-				)
-				serializer = EmployeeAllSerializer(attributes)
-			else:
-				return Response("User type not allowed", status=status.HTTP_401_UNAUTHORIZED)
+			username = self.request.user.username
+			serializer = getUserAllSerializer(username)
+			if serializer is None: return Response("User type not allowed", status=status.HTTP_401_UNAUTHORIZED)
 
 			#Get user data from serializer and get check hash/certificate
 			userDict = json.loads(json.dumps(serializer.data))["user"]
@@ -132,5 +137,62 @@ class AllViewSet(viewsets.ViewSet):
 			return Response("No CSR data found", status=status.HTTP_400_BAD_REQUEST)
 
 	def create(self, request):
-		print(request.headers)
 		return self.list(request)
+
+class AttributesViewSet(viewsets.ViewSet):
+	authentication_classes = [SessionAuthentication, BasicAuthentication]
+	permission_classes = [IsAuthenticated, IsAdminUser]
+
+	def list(self, request):
+		if "username" in self.request.data and "namespaces" in self.request.data:
+			#Get user and send data to serializer of its type
+			username = self.request.data["username"]
+			serializer = getUserAllSerializer(username)
+			if serializer is None: Response("User type not allowed", status=status.HTTP_401_UNAUTHORIZED)
+
+			#Get user data from serializer
+			userDict = json.loads(json.dumps(serializer.data))["user"]
+
+			attributes = self.request.data["namespaces"]
+			attributesDict = {}
+			for attribute in attributes:
+				if len(attribute.split("."))==2:
+					[model, modelAttribute] = attribute.split(".")
+					if modelAttribute in userDict[model]:
+						attributesDict[attribute] = userDict[model][modelAttribute]
+				elif attribute in userDict["user"]:
+					attributesDict[attribute] = userDict["user"][attribute]
+				elif attribute in userDict:
+					attributesDict[attribute] = userDict[attribute]
+				else:
+					attributesDict[attribute] = None
+
+			return Response(attributesDict)
+		else:
+			return Response("No username/namespaces were sent", status=status.HTTP_400_BAD_REQUEST)
+
+	def create(self, request):
+		return self.list(request)
+
+def getUserAttributes(username, attributes):
+	#Get user and send data to serializer of its type
+	serializer = getUserAllSerializer(username)
+	if serializer is None: return None
+
+	#Get user data from serializer
+	userDict = json.loads(json.dumps(serializer.data))["user"]
+
+	attributesDict = {}
+	for attribute in attributes:
+		if len(attribute.split("."))==2:
+			[model, modelAttribute] = attribute.split(".")
+			if modelAttribute in userDict[model]:
+				attributesDict[attribute] = userDict[model][modelAttribute]
+		elif attribute in userDict["user"]:
+			attributesDict[attribute] = userDict["user"][attribute]
+		elif attribute in userDict:
+			attributesDict[attribute] = userDict[attribute]
+		else:
+			attributesDict[attribute] = None
+
+	return attributesDict
