@@ -35,6 +35,8 @@ class UserSerializer(serializers.ModelSerializer):
 		return user
 
 class UserInfoSerializer(serializers.ModelSerializer):
+	picture = serializers.SerializerMethodField()
+
 	class Meta:
 		model = User
 		fields = [
@@ -44,6 +46,17 @@ class UserInfoSerializer(serializers.ModelSerializer):
 			"fullName",
 			"birthdate",
 			"picture"]
+
+	def get_picture(self, obj):
+		import base64
+		import os
+		print(obj.picture)
+		path = os.path.join('media', str(obj.picture))
+
+		with open(path, "rb") as image_file:
+			encoded_string = base64.b64encode(image_file.read())
+
+		return encoded_string
 
 # Student #############################################################################
 
