@@ -33,7 +33,7 @@ class User(AbstractUser):
 	userType = models.CharField(choices=UserType.choices, default=UserType.NONE, max_length=20)
 	fullName = models.CharField(max_length=300)
 	birthdate = models.DateField()
-	picture = models.ImageField(default='static/defaultAvatar.png', upload_to=path_and_rename('profilepictures/'), validators=[validate_image_size])
+	picture = models.ImageField(default='static/defaultAvatar.png', upload_to='profilepictures/', validators=[validate_image_size])
 	REQUIRED_FIELDS = ['fullName', 'birthdate']
 
 	def isStudent(self):
