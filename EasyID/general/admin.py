@@ -18,8 +18,26 @@ class UserAdmin(admin.ModelAdmin):
     def image_tag(self, obj):
         return format_html('<img src="{}"width="30" height="30" />'.format(obj.picture.url))
 
-    image_tag.short_description = 'Image'
+    image_tag.short_description = 'Picture'
 
     list_display = ['username', 'image_tag']
 
+    fieldsets = (
+        (None, {
+            'fields': ['username', 'password', 'userType', 'fullName', 'birthdate', 'picture']
+        }),
+        ('Advanced options', {
+            'classes': ('collapse',),
+            'fields': [
+                'first_name',
+                'last_name',
+                'email',
+                ('groups', 'user_permissions'),
+                ('is_staff', 'is_active', 'is_superuser'),
+                ('last_login', 'date_joined'),
+            ]
+        }),
+    )
 
+    def get_changeform_initial_data(self, request):
+        return {'birthdate': '2000-01-01'}
