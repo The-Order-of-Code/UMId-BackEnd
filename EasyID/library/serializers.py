@@ -13,6 +13,7 @@ class RoomSerializer(serializers.ModelSerializer):
 
 class ReservationSerializer(serializers.ModelSerializer):
 	def create(self, validated_data):
+		user = validated_data.pop('user', None)
 		userId = self.context.get('request', None).user.id
 		user = User.objects.get(id=userId)
 		reservation = Reservation.objects.create(user=user, **validated_data)
@@ -20,4 +21,4 @@ class ReservationSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Reservation
-		fields = ["start", "end", "room"]
+		fields = "__all__"

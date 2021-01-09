@@ -4,6 +4,7 @@ from .serializers import *
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework import viewsets
+from rest_framework import generics, mixins
 
 # Create your views here.
 
@@ -13,7 +14,10 @@ class RoomViewSet(viewsets.ModelViewSet):
 	authentication_classes = [SessionAuthentication, BasicAuthentication]
 	permission_classes = [IsAuthenticated, IsAdminUser]
 
-class ReservationViewSet(viewsets.ModelViewSet):
+class ReservationViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
+												  mixins.CreateModelMixin,
+												  mixins.RetrieveModelMixin,
+												  mixins.DestroyModelMixin):
 	queryset = Reservation.objects.all()
 	serializer_class = ReservationSerializer
 	authentication_classes = [SessionAuthentication, BasicAuthentication]

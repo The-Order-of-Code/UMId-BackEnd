@@ -27,6 +27,24 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+"""
+DEBUG = False
+
+ALLOWED_HOSTS = [".localhost", "127.0.0.1", "[::1]"] #["www.letsid.pt"]
+
+SECURE_HSTS_SECONDS = 60 #Change to bigger number (like 31536000 - 1 year) when https working correctly
+
+SECURE_SSL_REDIRECT = True
+
+SESSION_COOKIE_SECURE = True
+
+CSRF_COOKIE_SECURE = True
+
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+SECURE_HSTS_PRELOAD = True
+"""
+
 # Application definition
 
 DEFAULT_APPS = [
