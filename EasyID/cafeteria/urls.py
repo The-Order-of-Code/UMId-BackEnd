@@ -10,5 +10,6 @@ router.register("ticketLogs", TicketLogViewSet, basename="ticketLogs")
 
 urlpatterns = [
     path("", include(router.urls)),
-    path("validateTicket", validateTicket)
+    path("validateTicket", validateTicket),
+    path("addTickets", addTickets),
 ]

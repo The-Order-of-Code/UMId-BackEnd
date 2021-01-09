@@ -14,6 +14,7 @@ from django.conf import settings
 from django.utils import timezone
 
 from django.db import IntegrityError, transaction
+from django.core.exceptions import ValidationError
 
 
 # Create your views here.
@@ -79,7 +80,6 @@ def moveTicket(ticket, ticketlog):
 def validateTicket(request):
     u = request.user
     if u.is_authenticated:
-        print('what')
         if User(id=u.id).isEmployee() or u.is_staff:
             pass
         else:
@@ -110,7 +110,6 @@ def validateTicket(request):
                 if ticket:
                     return JsonResponse(TicketSerializer(ticket).data, status=status.HTTP_200_OK)
 
-            print(ticket)
             if ticket:
                 tl = TicketLog.fromTicket(ticket=ticket, employee=User.objects.get(id=1), operation='ayyyo')
 
@@ -128,4 +127,47 @@ def validateTicket(request):
             return simpleJsonResponse(fr'User with username {username} not found', status=status.HTTP_404_NOT_FOUND)
         except TicketType.DoesNotExist as e:
             return simpleJsonResponse(fr'TicketType with name {ttypename} not found', status=status.HTTP_404_NOT_FOUND)
-    return simpleJsonResponse('Request is not a POST', status=status.HTTP_501_NOT_IMPLEMENTED)
+    return simpleJsonResponse('Request is not a POST', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+def addTickets(request):
+    user = request.user
+    if not user.is_authenticated:
+        return simpleJsonResponse('Not logged in', status=status.HTTP_401_UNAUTHORIZED)
+
+    data = JSONParser().parse(request)
+    try:
+        tickets = data['tickets']
+    except KeyError as e:
+        return simpleJsonResponse(f'Field not found: {e.args[0]}', status=status.HTTP_404_NOT_FOUND)
+
+    for ticket in tickets:
+        try:
+            ticketType = ticket['ticketType']
+        except KeyError as e:
+            return simpleJsonResponse(f'Field not found: {e.args[0]}', status=status.HTTP_404_NOT_FOUND)
+        if 'dates' in ticket:
+            dates = ticket['dates']
+            try:
+                ticketType = TicketType.objects.get(name=ticketType)
+                for date in dates:
+                    ticket = Ticket(type=ticketType, user=user, date=date[:10])
+                    ticket.save()
+            except TicketType.DoesNotExist as e:
+                return simpleJsonResponse(f'Ticket type: {ticketType}, does not exist', status=status.HTTP_404_NOT_FOUND)
+            except ValidationError as e:
+                return simpleJsonResponse(f'date: {date} - is invalid. It must be in YYYY-MM-DD format', status=status.HTTP_404_NOT_FOUND)
+
+        elif 'amount' in ticket:
+            amount = ticket['amount']
+            try:
+                ticketType = TicketType.objects.get(name=ticketType)
+                for i in range(amount):
+                    ticket = Ticket(type=ticketType, user=user)
+                    ticket.save()
+            except TicketType.DoesNotExist as e:
+                return simpleJsonResponse(f'Ticket type: {ticketType}, does not exist', status=status.HTTP_404_NOT_FOUND)
+        else:
+            return simpleJsonResponse('No date or amount specified', status=status.HTTP_404_NOT_FOUND)
+    return simpleJsonResponse('Tickets added', status=status.HTTP_200_OK)
