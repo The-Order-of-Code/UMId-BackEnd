@@ -12,16 +12,20 @@ import datetime
 
 # Create your views here.
 
+# Room #############################################################################
+
 class RoomViewSet(viewsets.ModelViewSet):
 	queryset = Room.objects.all()
 	serializer_class = RoomSerializer
 	authentication_classes = [SessionAuthentication, BasicAuthentication]
 	permission_classes = [IsAuthenticated, IsAdminUser]
 
+# Reservation #############################################################################
+
 def reservationAvailable(roomId, startTime, endTime):
 	roomReservations = Reservation.objects.filter(room=roomId)
-	reservationBetween = roomReservations.filter(Q(start__lte=startTime) & Q(end__gte=startTime) | Q(start__lte=endTime) & Q(end__gte=endTime))
-	return startTime<endTime and len(reservationBetween)==0
+	conflictingReservations = roomReservations.filter(Q(start__lte=endTime) & Q(end__gte=startTime))
+	return startTime<endTime and len(conflictingReservations)==0
 
 class ReservationViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
 												  mixins.CreateModelMixin,
