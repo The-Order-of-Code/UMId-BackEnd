@@ -1,0 +1,29 @@
+SHOULD BE RAN IN UBUNTU!
+
+
+
+SETUP DATABASE:
+
+	Install and run mysql in host:
+		sudo apt-get install mysql-server
+		sudo service mysql start
+
+	Change root password:
+		sudo mysql
+		ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '';
+		CREATE SCHEMA EasyID;
+		quit
+
+	Create/Update tables:
+		python manage.py makemigrations
+		python manage.py migrate
+
+
+
+SETUP SERVER:
+
+	Build docker:
+		sudo docker build -t easyid ./
+
+	Run server:
+		sudo docker run -it -p 8000:8000 --network="host" easyid
