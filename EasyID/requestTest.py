@@ -17,16 +17,16 @@ csr = "-----BEGIN CERTIFICATE REQUEST-----\n" \
 userUsername = "pedro"
 attributes = ["fullName", "first_name", "birthdate", "course.designation", "nullAttribute"]
 
-api = "attributes" #all/attributes
+api = "library/freeTimes" #all/attributes
 
 credentials = username + ":" + password
 base64 = b64encode(credentials.encode('utf-8')).decode('utf-8')
 headers = {"Authorization": "Basic " + base64, 'Content-Type': 'application/json'}
 
-data = {"csr": csr, "username": userUsername, "namespaces": attributes}
+data = {"csr": csr, "username": userUsername, "namespaces": attributes, "id": 1}
 
 session = requests.session()
-response = session.post("http://127.0.0.1:8000/general/" + api + "/",
+response = session.post("http://127.0.0.1:8000/" + api + "/",
 						data=json.dumps(data),
 						headers=headers)
 print(response.text)
