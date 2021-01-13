@@ -1,5 +1,5 @@
 from .ca import CA
-from config import .Config
+from .config import Config
 import json
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
