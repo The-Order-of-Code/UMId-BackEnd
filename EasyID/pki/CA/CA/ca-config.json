@@ -1,0 +1,22 @@
+{
+    "signing": {
+        "default": {
+            "ocsp_url": "http://CA:8889",
+            "expiry": "26280h"
+        },
+        "profiles": {
+            "ocsp": {
+                "usages": ["digital signature", "ocsp signing"],
+                "expiry": "26280h"
+            },
+            "server": {
+                "usages": ["signing", "key encipherment", "server auth", "client auth"],
+                "expiry": "26280h"
+            },
+            "client": {
+                "usages": ["signing", "key encipherment", "client auth"],
+                "expiry": "8760h"
+            }
+        }
+    }
+}

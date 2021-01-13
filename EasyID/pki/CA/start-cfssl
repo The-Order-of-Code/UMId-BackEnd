@@ -1,0 +1,16 @@
+#!/bin/bash
+
+
+if [ ! -f "ca.pem" ];then
+
+  cfssl genkey -initca ca-csr.json | cfssljson -bare ca
+ 
+  cfssl gencert -ca ca.pem -ca-key ca-key.pem -config ca-config.json -profile="ocsp" ocsp.csr.json| cfssljson -bare server-ocsp -
+  cfssl ocsprefresh -db-config db-config.json -ca ca.pem -responder server-ocsp.pem -responder-key server-ocsp-key.pem
+  cfssl ocspdump -db-config db-config.json > ocsp.db
+
+fi
+
+cfssl ocspserve -address 0.0.0.0 -port 8889 -responses ocsp.db -db-config db-config.json &
+
+cfssl serve -address=0.0.0.0 -port=8888 -db-config=db-config.json -loglevel=0  -ca-key=ca-key.pem -ca=ca.pem -config=ca-config.json -responder=server-ocsp.pem -responder-key=server-ocsp-key.pem  && fg

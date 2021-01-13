@@ -1,0 +1,5 @@
+  
+{
+    "driver": "postgres",
+    "data_source": "postgres://u_cfssl:yR5rS6eO4rG3eI3vI3fT3wY2tJ6uP9jOgQ1fK2xC4qX5rN0gR9iZ1lI6lP1hV9jK@database/db_cfssl?sslmode=disable"
+}

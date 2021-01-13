@@ -3,7 +3,6 @@ from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 import paramiko
 import time
-from .config import Config
 
 
 class CA:
@@ -31,8 +30,6 @@ class CA:
         self.client = paramiko.SSHClient()
         # ssh private key
         self._k = paramiko.RSAKey.from_private_key_file(path_key)
-        # certificate of the CA server
-        self.ca_cert = Config.ca_cert
 
     def ssh(self, commands):
         """ It provides connection to the ssh server to execute commands remotely.
@@ -42,6 +39,7 @@ class CA:
         self.client.load_system_host_keys()
         # add to known hosts
         self.client.set_missing_host_key_policy(paramiko.RejectPolicy())
+
         print("connecting...")
 
         try:
@@ -75,16 +73,29 @@ class CA:
         certificate = self.pki.sign(hosts=(), certificate_request=csr, profile=profile)
         return certificate
 
+    def cfssl_info(self, label):
+        """ It returns information about the CA, including the cert.
+            Args:
+                label(str): A string specifying the signer.
+            Returns:
+                dict: Mapping with three keys:
+                        certificate (str): a PEM-encoded certificate of the signer.
+                        usage (list of str): Key usages from the signing profile.
+                        expiry (str): the expiry string from the signing profile.
+        """
+
+        return self.pki.info(label)
+
     def cfssl_revoke(self, certificate, reason):
         """ It provides certificate revocation.
-                Args:
-                    certificate (str): The certificate to be revoked
-                    reason (str): Identifying why the certificate was revoked; see,
-                        for example, ReasonStringToCode in the ocsp package or section
-                        4.2.1.13 of RFC 5280. The "reasons" used here are the
-                        ReasonFlag names in said RFC.
-                Returns:
-                    The returned result is an empty dict.
+            Args:
+                certificate (str): The certificate to be revoked
+                reason (str): Identifying why the certificate was revoked; see,
+                    for example, ReasonStringToCode in the ocsp package or section
+                    4.2.1.13 of RFC 5280. The "reasons" used here are the
+                    ReasonFlag names in said RFC.
+            Returns:
+                The returned result is an empty dict.
         """
         # convert the certificate to bytes and create a cryptography certificate object
         cert_bytes = bytes(certificate, 'utf-8')
@@ -93,7 +104,10 @@ class CA:
         serial = str(cert.serial_number)
 
         # convert the CA certificate to bytes create a cryptography certificate object
-        # ca_cert_bytes = bytes(self.ca_cert, 'utf-8')
+
+        # ca_cert = self.pki.info("CA")
+        # ca_cert_bytes = bytes(ca_cert['certificate'], 'utf-8')
+
         with open("./ca.pem", 'rb') as f:
             ca_cert_bytes = f.read()
         issuer_cert = x509.load_pem_x509_certificate(ca_cert_bytes, default_backend())

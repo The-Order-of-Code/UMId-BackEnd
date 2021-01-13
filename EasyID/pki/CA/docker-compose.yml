@@ -1,0 +1,37 @@
+# docker-compose.yml
+version: '3'
+
+services:
+  database:
+    container_name: pg
+    image: "postgres" # use latest official postgres version
+    environment:
+      POSTGRES_DB: db_cfssl
+      POSTGRES_USER: u_cfssl
+      POSTGRES_PASSWORD: yR5rS6eO4rG3eI3vI3fT3wY2tJ6uP9jOgQ1fK2xC4qX5rN0gR9iZ1lI6lP1hV9jK
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database-data:/var/lib/postgresql/data/ # persist data even if container shuts down     
+    ports:
+      - "5432:5432"
+    networks:
+      - ca_net
+  ca:
+    container_name: ca
+    build: .
+    volumes:
+       - CA:/CA/       
+
+    ports:
+      - "8888:8888"
+      - "8889:8889"
+    networks:
+      - ca_net
+
+networks:
+  ca_net:
+    driver: bridge
+
+volumes:
+  database-data:
+  CA:

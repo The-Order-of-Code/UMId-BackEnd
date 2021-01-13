@@ -1,0 +1,23 @@
+criar virtual environment
+
+python3 -m venv venv
+
+source venv/bin/activate
+
+
+criar virtual variables for config.py
+configurar ficheiro config.py
+
+instalar ssh
+ssh-keygen -t rsa
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+chmod og-wx ~/.ssh/authorized_keys 
+
+instalar docker-io, docker-compose
+
+cd CA
+
+sudo docker-compose build
+
+docker-compose up
+
