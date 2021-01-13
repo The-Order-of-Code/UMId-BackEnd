@@ -88,6 +88,10 @@ def validate(pub_key, token):
         return False
 
 
+def payload(token):
+    return jwt.decode(token, options={"verify_signature": False})
+
+
 
 # csr = "-----BEGIN CERTIFICATE REQUEST-----\n" \
 #       "MIIBCTCBsAIBADBOMQswCQYDVQQGEwJQVDEOMAwGA1UECAwFQnJhZ2ExDjAMBgNV\n" \
