@@ -1,7 +1,7 @@
 import getpass
 
 # Configuration file
-class Config
+class Config:
     # SET ENVIRONMENT VARIABLES
     hostname = "localhost"
     port = 8888
