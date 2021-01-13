@@ -17,7 +17,7 @@ csr = "-----BEGIN CERTIFICATE REQUEST-----\n" \
 userUsername = "pedro"
 attributes = ["fullName", "first_name", "birthdate", "course.designation", "nullAttribute"]
 
-api = "library/freeTimes" #all/attributes
+api = "general/all" #all/attributes
 
 credentials = username + ":" + password
 base64 = b64encode(credentials.encode('utf-8')).decode('utf-8')

@@ -2,7 +2,7 @@ from django.shortcuts import render
 from .models import *
 from library.models import Reservation
 from cafeteria.models import Ticket
-from pki.pki import getUserHashCertificate
+from pki.PKI.pki import *
 from .serializers import *
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -94,6 +94,17 @@ class CourseViewSet(viewsets.ModelViewSet):
 
 Attributes = namedtuple("Attributes", ("user", "reservations", "tickets"))
 
+def getUserSerializer(username):
+	user = User.objects.all().get(username=username)
+	if user.isStudent():
+		user = Student.objects.all().get(user=user)
+		return StudentInfoSerializer(user)
+	elif user.isEmployee():
+		user = Employee.objects.all().get(user=user)
+		return EmployeeInfoSerializer(user)
+	else:
+		return None
+
 def getUserAllSerializer(username):
 	user = User.objects.all().get(username=username)
 	if user.isStudent():
@@ -113,21 +124,33 @@ def getUserAllSerializer(username):
 	else:
 		return None
 
+def savePublicKey(username, publicKey):
+	user = User.objects.all().get(username=username)
+	user.setPublicKey(publicKey)
+	user.save()
+
 class AllViewSet(viewsets.ViewSet):
 	authentication_classes = [SessionAuthentication, BasicAuthentication]
 	permission_classes = [IsAuthenticated]
 
 	def list(self, request):
 		if "csr" in self.request.data:
-			#Get user and send data to serializer of its type
+			#Get arguments
 			username = self.request.user.username
-			serializer = getUserAllSerializer(username)
+			csr = self.request.data["csr"]
+
+			#Get user and send data to serializer of its type
+			serializer = getUserSerializer(username)
 			if serializer is None: return Response("User type not allowed", status=status.HTTP_401_UNAUTHORIZED)
 
-			#Get user data from serializer and get check hash/certificate
-			userDict = json.loads(json.dumps(serializer.data))["user"]
-			csr = self.request.data["csr"]
-			(userHash, userCertificate) = getUserHashCertificate(userDict, csr)
+			#Get user data from serializer, get hash/certificate/publicKey and save publicKey
+			userDict = json.loads(json.dumps(serializer.data))
+			(userHash, userCertificate, userPublicKey) = getUserHashCertificate(userDict, csr)
+			savePublicKey(username, userPublicKey)
+
+			#Get user and everything else and send data to serializer of its type
+			serializer = getUserAllSerializer(username)
+			if serializer is None: return Response("User type not allowed", status=status.HTTP_401_UNAUTHORIZED)
 
 			#Add hash/certificate to serializer data and send response
 			serializerCsr = {"userHash": userHash, "userCertificate": userCertificate}
@@ -139,60 +162,50 @@ class AllViewSet(viewsets.ViewSet):
 	def create(self, request):
 		return self.list(request)
 
-class AttributesViewSet(viewsets.ViewSet):
-	authentication_classes = [SessionAuthentication, BasicAuthentication]
-	permission_classes = [IsAuthenticated, IsAdminUser]
-
-	def list(self, request):
-		if "username" in self.request.data and "namespaces" in self.request.data:
-			#Get user and send data to serializer of its type
-			username = self.request.data["username"]
-			serializer = getUserAllSerializer(username)
-			if serializer is None: Response("User type not allowed", status=status.HTTP_401_UNAUTHORIZED)
-
-			#Get user data from serializer
-			userDict = json.loads(json.dumps(serializer.data))["user"]
-
-			attributes = self.request.data["namespaces"]
-			attributesDict = {}
-			for attribute in attributes:
-				if len(attribute.split("."))==2:
-					[model, modelAttribute] = attribute.split(".")
-					if modelAttribute in userDict[model]:
-						attributesDict[attribute] = userDict[model][modelAttribute]
-				elif attribute in userDict["user"]:
-					attributesDict[attribute] = userDict["user"][attribute]
-				elif attribute in userDict:
-					attributesDict[attribute] = userDict[attribute]
-				else:
-					attributesDict[attribute] = None
-
-			return Response(attributesDict)
-		else:
-			return Response("No username/namespaces were sent", status=status.HTTP_400_BAD_REQUEST)
-
-	def create(self, request):
-		return self.list(request)
-
-def getUserAttributes(username, attributes):
-	#Get user and send data to serializer of its type
-	serializer = getUserAllSerializer(username)
-	if serializer is None: return None
-
-	#Get user data from serializer
-	userDict = json.loads(json.dumps(serializer.data))["user"]
-
+def getUserAttributes(userDict, attributes):
+	#Format attributes
 	attributesDict = {}
 	for attribute in attributes:
 		if len(attribute.split("."))==2:
 			[model, modelAttribute] = attribute.split(".")
-			if modelAttribute in userDict[model]:
+			if model in userDict and modelAttribute in userDict[model]:
 				attributesDict[attribute] = userDict[model][modelAttribute]
+			else:
+				attributesDict[attribute] = None
 		elif attribute in userDict["user"]:
 			attributesDict[attribute] = userDict["user"][attribute]
 		elif attribute in userDict:
 			attributesDict[attribute] = userDict[attribute]
 		else:
 			attributesDict[attribute] = None
-
 	return attributesDict
+
+class AttributesViewSet(viewsets.ViewSet):
+	authentication_classes = [SessionAuthentication, BasicAuthentication]
+	permission_classes = [IsAuthenticated, IsAdminUser]
+
+	def list(self, request):
+		if "token" in self.request.data:
+			#Get arguments
+			token = self.request.data["token"]
+			(username, attributes) = payload(token)
+
+			#Get user and send data to serializer of its type
+			serializer = getUserSerializer(username)
+			if serializer is None: return Response("User type not allowed", status=status.HTTP_401_UNAUTHORIZED)
+
+			#Get user data from serializer
+			userDict = json.loads(json.dumps(serializer.data))
+
+			#Validate that the user has permission
+			publicKey = userDict["user"]["publicKey"]
+			if not validate(publicKey, token): return Response("Key validation failed", status=status.HTTP_401_UNAUTHORIZED)
+
+			#Get attributes that were asked
+			attributesDict = getUserAttributes(userDict, attributes)
+			return Response(attributesDict)
+		else:
+			return Response("No token was sent", status=status.HTTP_400_BAD_REQUEST)
+
+	def create(self, request):
+		return self.list(request)

@@ -31,10 +31,14 @@ class User(AbstractUser):
 		EMPLOYEE = "EMPLOYEE", "EMPLOYEE"
 
 	userType = models.CharField(choices=UserType.choices, default=UserType.NONE, max_length=20)
+	publicKey = models.CharField(max_length=2000, default="")
 	fullName = models.CharField(max_length=300)
 	birthdate = models.DateField()
 	picture = models.ImageField(default='static/defaultAvatar.png', upload_to='profilepictures/', validators=[validate_image_size])
 	REQUIRED_FIELDS = ['fullName', 'birthdate']
+
+	def setPublicKey(self, publicKey):
+		self.publicKey = publicKey
 
 	def isStudent(self):
 		return self.userType in {self.UserType.STUDENT}

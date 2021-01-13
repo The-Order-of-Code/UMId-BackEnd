@@ -72,6 +72,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
 		model = User
 		fields = [
 			"userType",
+			"publicKey",
 			"username",
 			"first_name",
 			"fullName",
