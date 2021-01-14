@@ -56,7 +56,7 @@ class CA:
         stdin.close()
         self.client.close()
         # print("OUTPUT: ", stdout.read())
-        # print("ERROR: ", stderr.read())
+        print("ERROR: ", stderr.read())
         print("connection closed")
         return stdout.read().decode()
 

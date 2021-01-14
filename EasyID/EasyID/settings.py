@@ -45,6 +45,8 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 """
 
+ALLOWED_HOSTS = ['*']
+
 # Application definition
 
 DEFAULT_APPS = [
