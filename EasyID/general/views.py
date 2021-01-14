@@ -13,29 +13,6 @@ from rest_framework import generics, mixins
 from collections import namedtuple
 import json
 
-# Create your views here.
-
-""" Exemplo Student POST:
-{
-	"user": {
-		"portrait": "", 
-		"username": "",
-		"password": "",
-		"firstName": "",
-		"fullName": "",
-		"birthDate": ""
-	},
-	"course": {
-		"designation": "",
-		"teachingResearchUnits": ""
-	}
-	"number": null,
-	"year": null,
-	"academicYear": null
-	}
-}
-"""
-
 class UserViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
 										   mixins.CreateModelMixin,
 										   mixins.RetrieveModelMixin):
@@ -153,8 +130,11 @@ class AllViewSet(viewsets.ViewSet):
 			if serializer is None: return Response("User type not allowed", status=status.HTTP_401_UNAUTHORIZED)
 
 			#Add hash/certificate to serializer data and send response
-			serializerCsr = {"userHash": userHash, "userCertificate": userCertificate}
-			serializerCsr.update(serializer.data)
+			serializerCsr = {"mso": userHash, "userCertificate": userCertificate}
+			
+			userInfo = json.loads(json.dumps(serializer.data))
+			(userInfo["user"])["user"].pop("publicKey")
+			serializerCsr.update(userInfo)
 			return Response(serializerCsr)
 		else:
 			return Response("No CSR data found", status=status.HTTP_400_BAD_REQUEST)
