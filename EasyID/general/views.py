@@ -190,3 +190,15 @@ class AttributesViewSet(viewsets.ViewSet):
 
 	def create(self, request):
 		return self.list(request)
+
+class CaCertViewSet(viewsets.ViewSet):
+	authentication_classes = [SessionAuthentication, BasicAuthentication]
+	permission_classes = [IsAuthenticated, IsAdminUser]
+	
+	def list(self, request):
+		#Get Ca Cert
+		caCert = get_ca_cert("CA")
+		return Response(caCert)
+
+	def create(self, request):
+		return self.list(request)

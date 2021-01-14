@@ -9,6 +9,7 @@ router.register("students", StudentViewSet, basename="students")
 router.register("employees", EmployeeViewSet, basename="employees")
 router.register("all", AllViewSet, basename="all")
 router.register("attributes", AttributesViewSet, basename="attributes")
+router.register("cacert", CaCertViewSet, basename="cacert")
 
 urlpatterns = [
     path("", include(router.urls)),

@@ -33,10 +33,13 @@ router.register("students", StudentViewSet, basename="students")
 router.register("employees", EmployeeViewSet, basename="employees")
 router.register("all", AllViewSet, basename="all")
 router.register("attributes", AttributesViewSet, basename="attributes")
+router.register("cacert", CaCertViewSet, basename="cacert")
+
 router.register("rooms", RoomViewSet, basename="rooms")
 router.register("freeRooms", FreeRoomViewSet, basename="freeRooms")
 router.register("reservations", ReservationViewSet, basename="reservations")
 router.register("freeTimes", FreeTimeViewSet, basename="freeTimes")
+
 router.register("tickets", TicketViewSet, basename="tickets")
 router.register("ticketTypes", TicketTypeViewSet, basename="ticketTypes")
 router.register("profiles", ProfileViewSet, basename="profiles")
