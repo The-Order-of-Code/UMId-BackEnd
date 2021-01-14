@@ -4,7 +4,8 @@ from .serializers import *
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework import viewsets
-
+from pki.PKI.pki import *
+from general.views import getUserSerializer
 from rest_framework.parsers import JSONParser
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -88,46 +89,60 @@ def validateTicket(request):
         return simpleJsonResponse('Not logged in', status=status.HTTP_401_UNAUTHORIZED)
 
     # Needs security implemented, only validates payload, assumes it's safe
-
     if request.method == 'POST':
         data = JSONParser().parse(request)
-        try:
-            payload = data['payload']
-            username = payload['user']
-            date = payload['date']
-            ttypename = payload['type']
+        print("data", data)
+        if "token" in data:
+            try:
+                token = data["token"]
+                payld = payload(token)
+                username = payld["username"]
+                print(username)
+                serializer = getUserSerializer(username)
+                print("here")
+                if serializer is None: return simpleJsonResponse("User type not allowed", status=status.HTTP_401_UNAUTHORIZED)
 
-            user = User.objects.get(username=username)
-            ttype = TicketType.objects.get(name=ttypename)
+                #Get user data from serializer
+                userDict = json.loads(json.dumps(serializer.data))
 
-            if date:
-                ticket = Ticket.objects.filter(user=user, date=timezone.now()).first()
-            else:
-                ticket = Ticket.objects.filter(user=user, type=ttype, date=None).first()
+                #Validate that the user has permission
+                publicKey = userDict["user"]["publicKey"]
+                if not validate(publicKey, token): return simpleJsonResponse("Key validation failed", status=status.HTTP_401_UNAUTHORIZED)
 
-            if settings.DEBUG and 'debugdate' in payload:
-                ticket = Ticket.objects.filter(user=user, date=payload['debugdate'][:10]).first()
+                date = payld['date']
+                ttypename = payld['type']
+
+                user = User.objects.get(username=username)
+                ttype = TicketType.objects.get(name=ttypename)
+
+                if date:
+                    ticket = Ticket.objects.filter(user=user, date=timezone.now()).first()
+                else:
+                    ticket = Ticket.objects.filter(user=user, type=ttype, date=None).first()
+
+                if settings.DEBUG and 'debugdate' in payld:
+                    ticket = Ticket.objects.filter(user=user, date=payld['debugdate'][:10]).first()
+                    if ticket:
+                        return JsonResponse(TicketSerializer(ticket).data, status=status.HTTP_200_OK)
+
                 if ticket:
-                    return JsonResponse(TicketSerializer(ticket).data, status=status.HTTP_200_OK)
+                    tl = TicketLog.fromTicket(ticket=ticket, employee=User.objects.get(id=1), operation='ayyyo')
 
-            if ticket:
-                tl = TicketLog.fromTicket(ticket=ticket, employee=User.objects.get(id=1), operation='ayyyo')
+                    try:
+                        moveTicket(ticket, tl)
+                    except IntegrityError:
+                        return HttpResponse(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-                try:
-                    moveTicket(ticket, tl)
-                except IntegrityError:
-                    return HttpResponse(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-                return HttpResponse(status=status.HTTP_200_OK)
-            else:
-                return simpleJsonResponse(f'Ticket not found', status=status.HTTP_404_NOT_FOUND)
-        except KeyError as e:
-            return simpleJsonResponse(f'Field not found: {e.args[0]}', status=status.HTTP_404_NOT_FOUND)
-        except User.DoesNotExist as e:
-            return simpleJsonResponse(fr'User with username {username} not found', status=status.HTTP_404_NOT_FOUND)
-        except TicketType.DoesNotExist as e:
-            return simpleJsonResponse(fr'TicketType with name {ttypename} not found', status=status.HTTP_404_NOT_FOUND)
-    return simpleJsonResponse('Request is not a POST', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    return HttpResponse(status=status.HTTP_200_OK)
+                else:
+                    return simpleJsonResponse(f'Ticket not found', status=status.HTTP_404_NOT_FOUND)
+            except KeyError as e:
+                return simpleJsonResponse(f'Field not found: {e.args[0]}', status=status.HTTP_404_NOT_FOUND)
+            except User.DoesNotExist as e:
+                return simpleJsonResponse(fr'User with username {username} not found', status=status.HTTP_404_NOT_FOUND)
+            except TicketType.DoesNotExist as e:
+                return simpleJsonResponse(fr'TicketType with name {ttypename} not found', status=status.HTTP_404_NOT_FOUND)
+    else: return simpleJsonResponse('Request is not a POST', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])

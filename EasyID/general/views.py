@@ -188,8 +188,9 @@ class AttributesViewSet(viewsets.ViewSet):
 		if "token" in self.request.data:
 			#Get arguments
 			token = self.request.data["token"]
-			(username, attributes) = payload(token)
-
+			data = payload(token)
+			username = data["username"]
+			attributes = data["namespaces"]
 			#Get user and send data to serializer of its type
 			serializer = getUserSerializer(username)
 			if serializer is None: return Response("User type not allowed", status=status.HTTP_401_UNAUTHORIZED)
