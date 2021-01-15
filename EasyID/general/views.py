@@ -114,14 +114,14 @@ def getUserAllSerializer(username):
 		attributes = Attributes(
 			user=Student.objects.all().get(user=user),
 			reservations=Reservation.objects.all().filter(user=user),
-			tickets=transformTickets(Ticket.objects.all().filter(user=user))
+			tickets=Ticket.objects.all().filter(user=user)
 		)
 		return StudentAllSerializer(attributes)
 	elif user.isEmployee():
 		attributes = Attributes(
 			user=Employee.objects.all().get(user=user),
 			reservations=Reservation.objects.all().filter(user=user),
-			tickets=transformTickets(Ticket.objects.all().filter(user=user))
+			tickets=Ticket.objects.all().filter(user=user)
 		)
 		return EmployeeAllSerializer(attributes)
 	else:
@@ -157,11 +157,17 @@ class AllViewSet(viewsets.ViewSet):
 
 			#Add hash/certificate to serializer data and send response
 			serializerCsr = {"mso": userHash, "userCertificate": userCertificate}
-			
+
+
 			userInfo = json.loads(json.dumps(serializer.data))
+			userInfo.pop("tickets")
 			(userInfo["user"])["user"].pop("publicKey")
+			user = User.objects.all().get(username=username)
+			tickets = transformTickets(Ticket.objects.all().filter(user=user))
+			userInfo["tickets"] = tickets
+			print(userInfo)
 			serializerCsr.update(userInfo)
-			print(serializerCsr)
+			#print(serializerCsr)
 			return Response(serializerCsr)
 		else:
 			return Response("No CSR data found", status=status.HTTP_400_BAD_REQUEST)
