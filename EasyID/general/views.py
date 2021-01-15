@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .models import *
 from library.models import Reservation
-from cafeteria.models import Ticket
+from cafeteria.models import Ticket, TicketType
 from pki.PKI.pki import *
 from .serializers import *
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
@@ -82,20 +82,46 @@ def getUserSerializer(username):
 	else:
 		return None
 
+def getDates(tickets):
+	dates = []
+	for ticket in tickets:
+		dates.append(ticket.date)
+
+	return dates
+
+def transformTickets(tickets):
+	ticketTypes = TicketType.objects.all()
+	ticketsDict = {}
+	ticketsWithDateDict = {}
+	ticketsWithNoDateDict = {}
+	for ticketType in ticketTypes: 
+		splitTickets = tickets.filter(type=ticketType)
+		ticketsWithDate = [x for x in list(splitTickets) if x.date != None]
+		ticketsWithNoDate = list(splitTickets.filter(date=None)) 
+		ticketsWithNoDateDict[ticketType.name] = len(ticketsWithNoDate)
+		ticketsWithDateDict[ticketType.name] = getDates(ticketsWithDate)
+
+	for ticketTypeK, ticketAmount in ticketsWithNoDateDict.items():
+		ticketsDict[ticketTypeK] = ticketAmount
+	
+	ticketsDict["promotional"] = ticketsWithDateDict
+
+	return ticketsDict
+
 def getUserAllSerializer(username):
 	user = User.objects.all().get(username=username)
 	if user.isStudent():
 		attributes = Attributes(
 			user=Student.objects.all().get(user=user),
 			reservations=Reservation.objects.all().filter(user=user),
-			tickets=Ticket.objects.all().filter(user=user)
+			tickets=transformTickets(Ticket.objects.all().filter(user=user))
 		)
 		return StudentAllSerializer(attributes)
 	elif user.isEmployee():
 		attributes = Attributes(
 			user=Employee.objects.all().get(user=user),
 			reservations=Reservation.objects.all().filter(user=user),
-			tickets=Ticket.objects.all().filter(user=user)
+			tickets=transformTickets(Ticket.objects.all().filter(user=user))
 		)
 		return EmployeeAllSerializer(attributes)
 	else:
@@ -135,6 +161,7 @@ class AllViewSet(viewsets.ViewSet):
 			userInfo = json.loads(json.dumps(serializer.data))
 			(userInfo["user"])["user"].pop("publicKey")
 			serializerCsr.update(userInfo)
+			print(serializerCsr)
 			return Response(serializerCsr)
 		else:
 			return Response("No CSR data found", status=status.HTTP_400_BAD_REQUEST)

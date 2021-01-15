@@ -97,9 +97,7 @@ def validateTicket(request):
                 token = data["token"]
                 payld = payload(token)
                 username = payld["username"]
-                print(username)
                 serializer = getUserSerializer(username)
-                print("here")
                 if serializer is None: return simpleJsonResponse("User type not allowed", status=status.HTTP_401_UNAUTHORIZED)
 
                 #Get user data from serializer
@@ -122,12 +120,11 @@ def validateTicket(request):
 
                 if settings.DEBUG and 'debugdate' in payld:
                     ticket = Ticket.objects.filter(user=user, date=payld['debugdate'][:10]).first()
-                    if ticket:
-                        return JsonResponse(TicketSerializer(ticket).data, status=status.HTTP_200_OK)
+                    #if ticket:
+                        #return JsonResponse(TicketSerializer(ticket).data, status=status.HTTP_200_OK)
 
                 if ticket:
                     tl = TicketLog.fromTicket(ticket=ticket, employee=User.objects.get(id=1), operation='ayyyo')
-
                     try:
                         moveTicket(ticket, tl)
                     except IntegrityError:
@@ -142,7 +139,7 @@ def validateTicket(request):
                 return simpleJsonResponse(fr'User with username {username} not found', status=status.HTTP_404_NOT_FOUND)
             except TicketType.DoesNotExist as e:
                 return simpleJsonResponse(fr'TicketType with name {ttypename} not found', status=status.HTTP_404_NOT_FOUND)
-    else: return simpleJsonResponse('Request is not a POST', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    else: return simpleJsonResponse('Request is not a POST', status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
 @api_view(['POST'])
@@ -153,6 +150,7 @@ def addTickets(request):
 
     data = JSONParser().parse(request)
     try:
+        username = data['username']
         tickets = data['tickets']
     except KeyError as e:
         return simpleJsonResponse(f'Field not found: {e.args[0]}', status=status.HTTP_404_NOT_FOUND)
@@ -167,12 +165,17 @@ def addTickets(request):
             try:
                 ticketType = TicketType.objects.get(name=ticketType)
                 for date in dates:
-                    ticket = Ticket(type=ticketType, user=user, date=date[:10])
-                    ticket.save()
+                    user = User.objects.all().get(username=username)
+                    tickets_date = Ticket.objects.all().filter(user=user, date=date[:10])
+                    print(len(tickets_date))
+                    if ((len(tickets_date)+1) > 2):  return simpleJsonResponse(f'Exceeded the number of promotional tickets for that date', status=status.HTTP_406_NOT_ACCEPTABLE)
+                    else: 
+                        ticket = Ticket(type=ticketType, user=user, date=date[:10])
+                        ticket.save()
             except TicketType.DoesNotExist as e:
                 return simpleJsonResponse(f'Ticket type: {ticketType}, does not exist', status=status.HTTP_404_NOT_FOUND)
             except ValidationError as e:
-                return simpleJsonResponse(f'date: {date} - is invalid. It must be in YYYY-MM-DD format', status=status.HTTP_404_NOT_FOUND)
+                return simpleJsonResponse(f'date: {date} - is invalid. It must be in YYYY-MM-DD format', status=status.HTTP_406_NOT_ACCEPTABLE)
 
         elif 'amount' in ticket:
             amount = ticket['amount']
