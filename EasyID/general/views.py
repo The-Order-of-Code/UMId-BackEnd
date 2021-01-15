@@ -49,9 +49,9 @@ class EmployeeViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
 											   mixins.CreateModelMixin,
 											   mixins.RetrieveModelMixin):
 	queryset = Employee.objects.all()
-	#Remove comments after testing, this is just to create admins easily
-	#authentication_classes = [SessionAuthentication, BasicAuthentication]
-	#permission_classes = [IsAuthenticated, IsAdminUser]
+	
+	authentication_classes = [SessionAuthentication, BasicAuthentication]
+	permission_classes = [IsAuthenticated, IsAdminUser]
 	
 	def get_serializer_class(self):
 		if self.action == "list" or self.action == "retrieve":
@@ -165,9 +165,7 @@ class AllViewSet(viewsets.ViewSet):
 			user = User.objects.all().get(username=username)
 			tickets = transformTickets(Ticket.objects.all().filter(user=user))
 			userInfo["tickets"] = tickets
-			print(userInfo)
 			serializerCsr.update(userInfo)
-			#print(serializerCsr)
 			return Response(serializerCsr)
 		else:
 			return Response("No CSR data found", status=status.HTTP_400_BAD_REQUEST)

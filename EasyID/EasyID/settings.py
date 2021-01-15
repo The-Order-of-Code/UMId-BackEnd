@@ -25,8 +25,6 @@ SECRET_KEY = '9g^^@_^+vj)rct!589)*p2+e6t6w0l*)r8iz1&+1&vxgb)cl5u'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [".localhost", "127.0.0.1", "[::1]"]
-
 """
 DEBUG = False
 

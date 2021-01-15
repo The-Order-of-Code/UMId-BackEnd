@@ -97,4 +97,3 @@ def validate(pub_key, token):
 
 def payload(token):
     return jwt.decode(token, options={"verify_signature": False})
-

@@ -2,7 +2,7 @@ import json
 import requests
 from base64 import b64encode
 
-username = "a82134"
+username = "a82142"
 password = "lourenco1234"
 
 csr = "-----BEGIN CERTIFICATE REQUEST-----\n" \
@@ -17,16 +17,16 @@ csr = "-----BEGIN CERTIFICATE REQUEST-----\n" \
 userUsername = "pedro"
 attributes = ["fullName", "first_name", "birthdate", "course.designation"]
 
-# api = "cafeteria/addTickets" 
+api = "cafeteria/addTickets" 
 # api = "general/attributes"
-api = "general/all"
+# api = "general/all"
 
 
 credentials = username + ":" + password
 base64 = b64encode(credentials.encode('utf-8')).decode('utf-8')
 headers = {"Authorization": "Basic " + base64, 'Content-Type': 'application/json'}
 
-#data = {"token": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImE4MjEzNCIsIm5hbWVzcGFjZXMiOlsiZnVsbE5hbWUiLCJmaXJzdF9uYW1lIiwiYmlydGhkYXRlIiwiY291cnNlLmRlc2lnbmF0aW9uIl19.8DJ_sDg2JVCkIDgfLP6di5wahb_YPfeAwUUU2fgKFJfFVelhSKyTN_LHluDYHhi7Xt6nFYHdyMDOqKH8qqacow" }
+data = {"employeeUsername": username, "token": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImE4MjEzNCIsInR5cGUiOiJTZW5oYSBjb21wbGV0YSIsImRhdGUiOnRydWUsImRlYnVnZGF0ZSI6IjIwNDEtMTEtMjVUMDE6Mjg6MzEuMTY0NTAxWiJ9.jNjNwQfvq4VbNR6dqbFV67gqE1i24tctJOpM756DoNYZXa-97ohQBWqaI8MN7GEsrUUNmeN00HabN2Z9ofauiQ" }
 # data = { 
 #       "username": username, 
 #       "tickets": [
@@ -43,18 +43,18 @@ headers = {"Authorization": "Basic " + base64, 'Content-Type': 'application/json
 #       }
 #       ]
 # }
-data = { "csr": csr }
+# data = { "csr": csr }
 
 session = requests.session()
-response = session.post("http://192.168.1.5:8000/" + api + "/",
-						data=json.dumps(data),
-						headers=headers)
-
-# response1 = session.post("http://192.168.1.5:8000/cafeteria/validateTicket",
+# response = session.post("http://192.168.1.5:8000/" + api + "/",
 # 						data=json.dumps(data),
 # 						headers=headers)
+
+response1 = session.post("http://192.168.1.5:8000/cafeteria/validateTicket",
+						data=json.dumps(data),
+						headers=headers)
 
 # response = session.post("http://192.168.1.5:8000/" + api ,
 # 						data=json.dumps(data),
 # 						headers=headers)
-print(response.text)
+print(response1.text)

@@ -72,7 +72,6 @@ def simpleJsonResponse(detail, status):
 @transaction.atomic
 def moveTicket(ticket, ticketlog):
     with transaction.atomic():
-        print('atomic')
         ticket.delete()
         ticketlog.save()
 
@@ -91,12 +90,12 @@ def validateTicket(request):
     # Needs security implemented, only validates payload, assumes it's safe
     if request.method == 'POST':
         data = JSONParser().parse(request)
-        print("data", data)
         if "token" in data:
             try:
                 token = data["token"]
                 payld = payload(token)
                 username = payld["username"]
+                employeeUsername = data["employeeUsername"]
                 serializer = getUserSerializer(username)
                 if serializer is None: return simpleJsonResponse("User type not allowed", status=status.HTTP_401_UNAUTHORIZED)
 
@@ -105,6 +104,7 @@ def validateTicket(request):
 
                 #Validate that the user has permission
                 publicKey = userDict["user"]["publicKey"]
+                
                 if not validate(publicKey, token): return simpleJsonResponse("Key validation failed", status=status.HTTP_401_UNAUTHORIZED)
 
                 date = payld['date']
@@ -120,11 +120,9 @@ def validateTicket(request):
 
                 if settings.DEBUG and 'debugdate' in payld:
                     ticket = Ticket.objects.filter(user=user, date=payld['debugdate'][:10]).first()
-                    #if ticket:
-                        #return JsonResponse(TicketSerializer(ticket).data, status=status.HTTP_200_OK)
 
                 if ticket:
-                    tl = TicketLog.fromTicket(ticket=ticket, employee=User.objects.get(id=1), operation='ayyyo')
+                    tl = TicketLog.fromTicket(ticket=ticket, employee=User.objects.get(username=employeeUsername), operation='ayyyo')
                     try:
                         moveTicket(ticket, tl)
                     except IntegrityError:
@@ -167,7 +165,6 @@ def addTickets(request):
                 for date in dates:
                     user = User.objects.all().get(username=username)
                     tickets_date = Ticket.objects.all().filter(user=user, date=date[:10])
-                    print(len(tickets_date))
                     if ((len(tickets_date)+1) > 2):  return simpleJsonResponse(f'Exceeded the number of promotional tickets for that date', status=status.HTTP_406_NOT_ACCEPTABLE)
                     else: 
                         ticket = Ticket(type=ticketType, user=user, date=date[:10])
