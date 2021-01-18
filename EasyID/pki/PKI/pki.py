@@ -22,6 +22,7 @@ def getUserHashCertificate(userDict, csr):
         Returns:
             tuple:  mso (dict): The signed MSO structure.
                     user_cert (str): A PEM-encoded certificate of the user.
+                    pub_key (str): A PEM-encoded public key of user's certificate.
     """
 
     userDict["user"].pop("publicKey")
@@ -60,11 +61,12 @@ def getUserHashCertificate(userDict, csr):
     user_dict_ = str(user_hash).rstrip().replace("'", '"')
     mso = json.loads(user_dict_)
 
-    return mso, user_cert, pub_key
+    return mso, user_cert, pub_key.decode()
 
 
 def get_ca_cert(label):
-    """ It returns the CA's certificate.
+    """ 
+    It returns the CA's certificate.
         Args:
             label(str): A string specifying the signer.
         Returns:
@@ -96,4 +98,25 @@ def validate(pub_key, token):
 
 
 def payload(token):
+    """
+    It decodes a JWT token.
+        Args:
+            token(str): Token to be decoded
+        Returns:
+            dict: Payload decoded.
+    """
     return jwt.decode(token, options={"verify_signature": False})
+
+
+def attrib_token(attrib, private_key, alg="ES256"):
+    """
+    It creates a JWT token.
+        Args:
+            attrib(dict): A structure to create the token.
+            private_key(str): Private key to sign the token.
+            alg(str): Algorithm used to sign the token (default=ES256).
+        Returns:
+            str: A JWT token sign with backend's cert key.
+    """
+
+    return jwt.encode(attrib, private_key, algorithm=alg)
