@@ -95,11 +95,14 @@ class ReservationViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
 				return Reservation.objects.all().filter(user=self.request.user)
 
 	def create(self, request, *args,**kwargs):
+		userId = self.request.user.id
+		self.request.data["user"] = userId
+
 		room = self.request.data["room"]
 		start = self.request.data["start"]
 		end = self.request.data["end"]
 		if reservationAvailable(room, start, end):
-			return super(ReservationViewSet, self).create(request, *args,**kwargs)
+			return super(ReservationViewSet, self).create(self.request, *args,**kwargs)
 		else:
 			return Response("Reservation time not available", status=status.HTTP_400_BAD_REQUEST)
 
